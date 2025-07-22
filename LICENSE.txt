@@ -4,7 +4,7 @@ Copyright (c) 2025 DeMorMr (https://github.com/DeMorMr). All Rights Reserved.
 
 1. Grant of Access:
 You are granted a non-exclusive, non-transferable, revocable right to access 
-and use the functionality of the website hosted at https://roweb.github.io solely 
+and use the functionality of the website hosted at https://demormr.github.io/roweb.github.io/ solely 
 for personal or internal business purposes.
 
 2. Restrictions:
