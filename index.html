@@ -1,7 +1,88 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="data/needable/feed-icon-14x14.png" type="image/x-icon">
+	<title>ROWEB: A FREE Favorite List</title>
+	<link rel="stylesheet" href="default.css">
+</head>
 <body>
-<h1>Hello World</h1>
-<p>test</p>
+
+<header class='banner'><img onclick="play_sound('HalloweenLightning.mp3')" src="data\needable\Roblox Logo Election 08.png"></header>
+<div class="information"><div class="information-text">Powering Imagination, Welcome to RoWeb!</div></div>
+
+<container>
+    <div>
+        <div class='upload'>
+        <div class='t'>Place Adder</div>
+            <div class='css'>
+                <b>Name</b><br>
+                <input type="text" id="placeName"><br>
+                <b>Link</b><br>
+                <input type="text" id="placeUrl"><br>
+                <div class='center'>
+                    <button onclick="savePlace()">Save</button>
+                    <button onclick="downloadData()">Export</button>
+                    <input type="file" id="importFile" accept=".json" style="display:none">
+                    <button onclick="document.getElementById('importFile').click()">Import</button><br>
+                    <button onclick="toggleEditMode()" id="editModeBtn">Edit</button>
+                    <small>Or</small>
+                    <button onclick="clearAllPlaces()">Reset</button>
+                </div>
+                <div class='center'>
+                    <img onclick='play_sound("ouch.mp3")'class='unselectable' src='data\needable\NewFrontPageGuy.png'><br>
+                    <a onclick="play_sound('Short spring sound.mp3')" target="_blank" href='https://discord.gg/yFj4FRFDnp'>OUR DISCORD SERVER</a>
+                    <div style='font-family: "geo_1";'>Want to help us? Join to our server!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class='block'>
+        <ht>ROWEB Favorite Discovery</ht> powered by my Friends & bad discovery roblox. <a target="_blank" onclick="play_sound('Short spring sound.mp3')"href='https://github.com/DeMorMr/RoWeb-Discovery'>RoWeb GitHub🌐</a><br>
+        <hd>ROWEB is Free!</hd> Client: v1.0.0
+        <div class='places' id="placesContainer"><div class='place'></div></div> 
+        <div id="paginationContainer"></div>
+    </div>
+
+    <div class="music-player">
+        <div class="track-info"><div class="track-name" id="track-name">Loading...</div></div>
+        <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="controls"><button id="prev-btn">⏮</button><button id="play-btn">▶</button><button id="next-btn">⏭</button></div>
+        <div class="volume-container"><span>🔊</span><input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7"></div>
+    </div>
+</container>
+
+<div class='cool'>
+    <div class='d'>
+        <div class='tb'>
+            <b class='title'>Cool Places</b>
+            <div class='desc'>
+                Check out some of UR
+                <br>
+                favorite ROBLOX
+                <br>
+                places!
+            </div>
+        </div>
+    </div>
+    <button id="prevCoolBtn">&lt; Prev</button>
+    <div class='UserPlaces'></div>
+    <button id="nextCoolBtn">Next &gt;</button>
+</div>
+
+<br>
+<footer>
+<hr>
+ROBLOX, "Online Building Toy", characters, logos, names, and all related indicia are trademarks of ROBLOX Corporation, ©2008. Patents pending.
+<br>
+ROBLOX Corp. is not affliated with Lego, MegaBloks, Bionicle, Pokemon, Nintendo, Lincoln Logs, Yu Gi Oh, K'nex, Tinkertoys, Erector Set, or the Pirates of the Caribbean. ARrrr!
+Use of this site signifies your acceptance of the Terms and Conditions.
+<br>
+Privacy Policy  |  Contact Us  |  About Us  |  Jobs
+</footer>
+
 </body>
+<script src="frontend.js"></script>
 </html>
