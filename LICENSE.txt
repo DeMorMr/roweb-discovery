@@ -1,0 +1,22 @@
+PROPRIETARY LICENSE
+
+Copyright (c) 2025 DeMorMr (https://github.com/DeMorMr). All Rights Reserved.
+
+1. Grant of Access:
+You are granted a non-exclusive, non-transferable, revocable right to access 
+and use the functionality of the website hosted at https://roweb.github.io solely 
+for personal or internal business purposes.
+
+2. Restrictions:
+You are expressly prohibited from:
+   a) Copying, modifying, distributing, selling, or reverse-engineering any source code, 
+      HTML, CSS, JavaScript, or other assets contained in this repository.
+   b) Using the code to create derivative works or competing services.
+   c) Downloading, scraping, or extracting code for reuse outside this website.
+
+3. Ownership:
+All intellectual property rights in the code and website remain exclusively with 
+the copyright holder.
+
+4. Termination:
+Violation of these terms automatically terminates your access rights.
