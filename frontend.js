@@ -114,35 +114,35 @@ function downloadData() {
 
 // Thumbnails
 const thumbnailCache = new Map();
-
 async function getThumbnailUrl(placeId, size = 256) {
     const cacheKey = `${placeId}_${size}`;
-    if (thumbnailCache.has(cacheKey)) {
-        return thumbnailCache.get(cacheKey);
-    }
-    
-    const PROXY_SERVERS = [
-        "https://api.allorigins.win/raw?url=",
-        "https://corsproxy.io/?",
-        "https://api.codetabs.com/v1/proxy?quest="
-    ];
-    
+    if (thumbnailCache.has(cacheKey)) {return thumbnailCache.get(cacheKey);}
     const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${placeId}&size=${size}x${size}&format=Png&isCircular=false`;
-    
-    for (const proxy of PROXY_SERVERS) {
-        try {
-            const response = await fetch(proxy + encodeURIComponent(apiUrl));
-            if (!response.ok) continue;
+    // Yippe
+    try {
+        const response = await fetch(apiUrl);
+        if (response.ok) {
             const data = await response.json();
             if (data.data?.[0]?.imageUrl) {
                 thumbnailCache.set(cacheKey, data.data[0].imageUrl);
                 return data.data[0].imageUrl;
             }
+        }
+    } catch (directError) {
+        console.log("Direct request failed, trying proxies...");
+    }
+    // Bruh
+    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];
+    for (const proxy of PROXY_SERVERS) {
+        try {
+            const response = await fetch(proxy + encodeURIComponent(apiUrl));
+            if (!response.ok) continue;
+            const data = await response.json();
+            if (data.data?.[0]?.imageUrl) {thumbnailCache.set(cacheKey, data.data[0].imageUrl);return data.data[0].imageUrl;}
         } catch (e) {
             console.error(`Proxy error (${proxy}):`, e);
         }
     }
-    
     thumbnailCache.set(cacheKey, null);
     return null;
 }
@@ -193,7 +193,6 @@ function renderPlaces() {
     const container = document.getElementById('placesContainer');
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
     const selectedCategory = document.getElementById('categoryFilter').value;
-
     if (savedPlaces.length === 0) {
         container.innerHTML = `
             <div class="empty-message">
@@ -204,28 +203,20 @@ function renderPlaces() {
         `;
         return;
     }
-
     let filteredPlaces = savedPlaces;
     if (selectedCategory !== 'All') {
         filteredPlaces = savedPlaces.filter(place => {
-            if (selectedCategory === 'None') {
-                return !place.category || place.category === '';
-            }
+            if (selectedCategory === 'None') {return !place.category || place.category === '';}
             return place.category === selectedCategory;
         });
     }
-    
     const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage);
-    if (currentPage >= totalPages && totalPages > 0) {
-        currentPage = totalPages - 1;
-    }
-    
+    if (currentPage >= totalPages && totalPages > 0) {currentPage = totalPages - 1;}
+
     const startIndex = currentPage * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);
     const placesToShow = filteredPlaces.slice(startIndex, endIndex);
-    
     container.innerHTML = '';
-    
     placesToShow.forEach((place, index) => {
         const globalIndex = startIndex + index;
         const displayCategory = place.category ? place.category : 'None';
@@ -245,7 +236,6 @@ function renderPlaces() {
         </div>
         `;
     });
-    
     renderPagination(totalPages);
     loadThumbnails(placesToShow, startIndex);
 }
