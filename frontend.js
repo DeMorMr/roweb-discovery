@@ -1,16 +1,11 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
 function play_sound(name) {var audio = new Audio();audio.src = 'data/needable/sounds/' + name;audio.autoplay = true;return true;}
 
-
 function switchdiv(hideId, showId, displayType = 'block') {
-    const hideElement = document.getElementById(hideId);
-    const showElement = document.getElementById(showId);
-    if (hideElement) hideElement.style.display = 'none';
-    if (showElement) showElement.style.display = displayType;
+    const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);
+    if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;
     play_sound("click.mp3");
 }
-
-
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 
 
@@ -28,9 +23,7 @@ function clearThumbnailCache() {thumbnailCache.clear();}
 let categories = ['All', 'Adventure', 'Tycoon', 'Roleplay', 'Obby', 'Shooter'];
 function initCategories() {
     const savedCategories = JSON.parse(localStorage.getItem('categories'));
-    if (savedCategories && savedCategories.length > 0) {
-        categories = savedCategories;
-    }
+    if (savedCategories && savedCategories.length > 0) {categories = savedCategories;}
     if (!categories.includes('All')) categories.unshift('All');
     if (!categories.includes('None')) categories.push('None');
     localStorage.setItem('categories', JSON.stringify(categories));
@@ -55,32 +48,23 @@ function populateCategoryDropdowns() {
         select.innerHTML = '';
         categories.forEach(category => {
             if (select === categorySelect && category === 'All') return;
-            
             const option = document.createElement('option');
             option.value = category;
             option.textContent = category;
             select.appendChild(option);
         });
     });
-    categorySelect.value = 'None';
-    filterSelect.value = 'All';
+    categorySelect.value = 'None';filterSelect.value = 'All';
 }
 
 function savePlace() {
     const name = document.getElementById('placeName').value;
     const url = document.getElementById('placeUrl').value;
     const category = document.getElementById('placeCategory').value;
-
     if (name.length > 50) {alert("Place name cannot exceed 39 characters!");play_sound("ouch.mp3");return;}
     if (!name || !url) {alert("Please fill both fields!");play_sound("ouch.mp3");return;}
     let id = extractPlaceId(url);
-    if (!id) {
-        const numMatch = url.match(/\b(\d+)\b/);
-        if (numMatch && numMatch[1].length >= 7) {
-            id = numMatch[1];
-        }
-    }
-    
+    if (!id) {const numMatch = url.match(/\b(\d+)\b/);if (numMatch && numMatch[1].length >= 7) {id = numMatch[1];}}
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
     const normalizedUrl = normalizeRobloxUrl(url);
     const isDuplicate = savedPlaces.some(place => {
@@ -88,9 +72,7 @@ function savePlace() {
         const placeNormalizedUrl = normalizeRobloxUrl(place.url);
         return placeNormalizedUrl === normalizedUrl;
     });
-    
     if (isDuplicate) {alert("This place is already saved!");return;}
-    
     const storeCategory = category === 'None' ? '' : category;
     const place = {
         id,
@@ -106,7 +88,6 @@ function savePlace() {
             minute: '2-digit'
         }).replace(',', '')
     };
-    
     savedPlaces.push(place);
     localStorage.setItem('places', JSON.stringify(savedPlaces));
     play_sound("splat.mp3");
@@ -211,9 +192,19 @@ function toggleEditMode() {editMode = !editMode;renderPlaces();play_sound(editMo
 function renderPlaces() {
     const container = document.getElementById('placesContainer');
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    
     const selectedCategory = document.getElementById('categoryFilter').value;
-    
+
+    if (savedPlaces.length === 0) {
+        container.innerHTML = `
+            <div class="empty-message">
+                What's here is empty :(<br>
+                Want to see my list?<br>
+                <button onclick="loadDefaultList()">Load</button>
+            </div>
+        `;
+        return;
+    }
+
     let filteredPlaces = savedPlaces;
     if (selectedCategory !== 'All') {
         filteredPlaces = savedPlaces.filter(place => {
@@ -258,6 +249,66 @@ function renderPlaces() {
     renderPagination(totalPages);
     loadThumbnails(placesToShow, startIndex);
 }
+
+
+
+function loadDefaultList() {
+    fetch('My_Fav_List.json')
+        .then(response => {if (!response.ok) throw new Error('File not found');return response.json();})
+        .then(importedPlaces => {
+            if (!Array.isArray(importedPlaces)) {alert("Error: Invalid data format");return;}
+            
+            const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
+            let duplicates = 0;
+            let imported = 0;
+            let invalid = 0;
+            
+            importedPlaces.forEach(place => {
+                if (!place.url || !place.name) {invalid++;return;}
+                const id = place.id || extractPlaceId(place.url);
+                const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
+                
+                const isDuplicate = savedPlaces.some(savedPlace => {
+                    return (id && savedPlace.id === id) || 
+                           savedPlace.normalizedUrl === normalizedUrl ||
+                           normalizeRobloxUrl(savedPlace.url) === normalizedUrl;
+                });
+                
+                if (isDuplicate) {duplicates++;
+                } else {
+                    const completePlace = {
+                        id,
+                        name: place.name,
+                        url: place.url,
+                        category: place.category || '',
+                        normalizedUrl,
+                        date: place.date || new Date().toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }).replace(',', '')
+                    };
+                    savedPlaces.push(completePlace);
+                    imported++;
+                }
+            });
+            
+            localStorage.setItem('places', JSON.stringify(savedPlaces));
+            renderPlaces();
+            nextCoolSet();
+            alert(`Successfully imported: ${imported}\nDuplicates skipped: ${duplicates}\nInvalid entries: ${invalid}`);
+            play_sound("victory.mp3");
+        })
+        .catch(error => {
+            alert(`Error loading default list: ${error.message}\nMake sure Fav-List.json is in the same directory`);
+            console.error("Load error:", error);
+            play_sound("ouch.mp3");
+        });
+}
+
+
 
 function renderPagination(totalPages) {
     const container = document.getElementById('paginationContainer');
