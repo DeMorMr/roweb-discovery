@@ -11,7 +11,7 @@ function switchdiv(hideId, showId, displayType = 'block') {
 }
 
 
-
+function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 
 
 let currentPage = 0;
