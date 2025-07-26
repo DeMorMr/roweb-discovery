@@ -128,9 +128,7 @@ async function getThumbnailUrl(placeId, size = 256) {
                 return data.data[0].imageUrl;
             }
         }
-    } catch (directError) {
-        console.log("Direct request failed, trying proxies...");
-    }
+    } catch (directError) {console.log("Direct request failed, trying proxies...");}
     // Bruh
     const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];
     for (const proxy of PROXY_SERVERS) {
