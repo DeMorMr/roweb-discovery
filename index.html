@@ -31,31 +31,53 @@
         <div class='upload'>
         <div class='t'>Place Adder</div>
             <div class='css'>
-                <b>Name</b><br>
-                <input type="text" id="placeName"><br>
-                <b>Link</b><br>
-                <input type="text" id="placeUrl"><br>
-                <div class='center'>
-                    <button onclick="savePlace()">Save</button>
-                    <button onclick="downloadData()">Export</button>
-                    <input type="file" id="importFile" accept=".json" style="display:none">
-                    <button onclick="document.getElementById('importFile').click()">Import</button><br>
-                    <button onclick="toggleEditMode()" id="editModeBtn">Edit</button>
-                    <small>Or</small>
-                    <button onclick="clearAllPlaces()">Reset</button>
+
+                <div id='add_div_0' style="display:none;">
+                    <b>Category Name</b><br>
+                    <input type="text" id="newCategory">
+                    <button onclick="saveCategory()">Save</button>
+                    <button onclick="switchdiv('add_div_0','add_div_1')">< Back</button>
                 </div>
-                <div class='center'>
-                    <img onclick='play_sound("ouch.mp3")'class='unselectable' src='data\needable\NewFrontPageGuy.png'><br>
-                    <a onclick="play_sound('Short spring sound.mp3')" target="_blank" href='https://discord.gg/yFj4FRFDnp'>OUR DISCORD SERVER</a>
-                    <div style='font-family: "geo_1";'>Want to help us? Join to our server!</div>
-                </div>
+
+                <div id='add_div_1' style="display:block;">
+                    <b>Name</b><br>
+                    <input type="text" id="placeName"><br>
+                    <b>Link</b><br>
+                    <input type="text" id="placeUrl"><br> 
+                
+                    <div id='category_div'>
+                        <select id="placeCategory"></select>
+                    </div>
+                    
+                    <div class='center'>
+                        <button onclick="savePlace()">Save</button>
+                        <button onclick="downloadData()">Export</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none">
+                        <button onclick="document.getElementById('importFile').click()">Import</button><br>
+                        <button onclick="toggleEditMode()" id="editModeBtn">Edit</button>
+                        <small>Or</small>
+                        <button onclick="clearAllPlaces()">Reset</button>
+                    </div>
+                    </div>
+
+                    <div class='center'>
+                        <img onclick='play_sound("ouch.mp3")'class='unselectable' src='data\needable\NewFrontPageGuy.png'><br>
+                        <a onclick="play_sound('Short spring sound.mp3')" target="_blank" href='https://discord.gg/yFj4FRFDnp'>OUR DISCORD SERVER</a>
+                        <div style='font-family: "geo_1";'>Want to help us? Join to our server!</div>
+                    </div>
+                
+
             </div>
         </div>
     </div>
 
     <div class='block'>
         <ht>ROWEB Favorite Discovery</ht> powered by my Friends & bad discovery roblox. <a target="_blank" onclick="play_sound('Short spring sound.mp3')"href='https://github.com/DeMorMr/roweb.github.io/tree/main'>RoWeb GitHub🌐</a><br>
-        <hd>ROWEB is Free!</hd> Client: v1.0.0
+        <hd>ROWEB is Free!</hd> Client: v1.0.0 //
+        <label for="categoryFilter">Filter by Category:</label>
+        <select id="categoryFilter"></select>
+        <a style='color:black;'onclick="switchdiv('add_div_1','add_div_0')">+</a>
+
         <div class='places' id="placesContainer"><div class='place'></div></div> 
         <div id="paginationContainer"></div>
     </div>

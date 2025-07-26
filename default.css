@@ -22,11 +22,11 @@ a{text-decoration:none;color:#2900ff;}
 .upload .t{font-family:Arial;border-bottom:1px solid #010101;background-color:#cccccc;width:100%;height:20px;letter-spacing:2px;text-align:center;}
 .upload img{margin-top:90px;}
 
-.block{border: 1px solid #010101;width:750px;height:530px;font-size:12px;margin-top:10px;background-color:#eeeeee;color:#333333;} /*height:475px;*/
+.block{background-color:#eeeeee;border:1px solid #010101;width:750px;height:530px;font-size:12px;margin-top:10px;color:#333333;} /*height:475px;*/
 .block ht{font-size:25px;padding:0px 10px 0px;font-weight:bold;}
 .block hd{font-size:15px;padding:0px 10px 0px;font-weight:bold;}
 
-.places{font-family:Arial;width:718px;height:425px;background-color:#ffffff;padding:10px;text-align:center;} /*border: 1px solid #010101;height:370px;*/
+.places{background-color:#ffffff;font-family:Arial;width:718px;height:425px;padding:10px;text-align:center;} /*border: 1px solid #010101;height:370px;*/
 .place{width:115px;height:95px;display:inline-block;padding:0px 10px 50px;overflow-wrap:break-word;vertical-align:top;text-align:left;} /* border: 1px solid red;*/
 .place img{aspect-ratio:16/10;width:115px;border:1px solid #010101;}
 .place t{font-size:12px;color:#2900ff;font-weight:bold;} /* border: 1px solid #010101;*/
@@ -47,8 +47,11 @@ a{text-decoration:none;color:#2900ff;}
 .pagination {display:flex;justify-content:center;align-items:center;gap:10px;margin:0px 0;}
 .pagination button:disabled{opacity:0.5;cursor:not-allowed;}
 
-input {background-color:#ffffff;width: 100%;max-width:500px;max-height: 20px;box-sizing: border-box;font-size: 10px;border:none;border: 2px solid #777777;outline:none;border-style: dashed;}
-input:focus {border-radius:5px;border:2px solid #101010;}
+input{background-color:#ffffff;width: 100%;max-width:500px;max-height: 20px;box-sizing: border-box;font-size: 10px;border:none;border: 2px solid #777777;outline:none;border-style: dashed;}
+input:focus{border-radius:5px;border:2px solid #101010;}
+
+select{font-family:'geo_1';max-height:15px;max-width:95px;font-size:10px;border: 2px solid #777777;}
+select:focus{background-color:#6e99c9;color:white;}
 
 button{border:none;border: 1px solid #777777;margin-top:5px;background:#ffffff;color:#777777;font-size:10px;min-width:40px;min-height:20px;}
 button:hover{background:#6e99c9;color:#ffffff;text-decoration:underline;border:1px solid #000000;}
