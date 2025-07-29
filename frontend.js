@@ -16,7 +16,7 @@ const itemsPerPage = 15;
 function extractPlaceId(url) {const match = url.match(/(?:\/\/|\b)(?:www\.)?(?:rblx\.games|roblox\.com)\/games\/(\d+)(?:\/|$|\?)/);return match ? match[1] : null;}
 function normalizeRobloxUrl(url) {const id = extractPlaceId(url);if (!id) return url.toLowerCase();return `https://www.roblox.com/games/${id}`;}
 
-function saveCache_n() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
+function saveCache() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
 function loadCache_n() {const cachedData = localStorage.getItem('thumbnailCache');if (cachedData) thumbnailCache = new Map(Object.entries(JSON.parse(cachedData)));}
 // test
 function loadCache() {
@@ -33,14 +33,7 @@ function loadCache() {
         }
     }
 }
-function saveCache() {
-    try {
-        const cacheObj = Object.fromEntries(thumbnailCache);
-        localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));
-    } catch (e) {
-        console.error('Failed to save thumbnail cache', e);
-    }
-}
+
 
 function clearThumbnailCache() {thumbnailCache.clear();}
 
@@ -217,8 +210,6 @@ async function fetchThumbnailsBatch(placeIds, size = 256) {
 async function getThumbnailsUrls(placeIds, size = 256) {
     const results = new Map();
     const toFetch = [];
-    
-    // Проверяем кэш
     placeIds.forEach(placeId => {
         const cacheKey = `${placeId}_${size}`;
         if (thumbnailCache.has(cacheKey)) {
@@ -227,8 +218,6 @@ async function getThumbnailsUrls(placeIds, size = 256) {
             toFetch.push(placeId);
         }
     });
-
-    // Обрабатываем оставшиеся ID пачками
     for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
         const batch = toFetch.slice(i, i + BATCH_SIZE);
         const batchResults = await fetchThumbnailsBatch(batch, size);
@@ -271,7 +260,6 @@ async function loadThumbnails(placesToShow, startIndex) {
     });
 }
 
-// Функция загрузки "крутых" миниатюр
 async function loadCoolThumbnails(places) {
     const placeIds = [];
     const imageElements = [];
