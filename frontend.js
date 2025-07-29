@@ -15,8 +15,32 @@ const itemsPerPage = 15;
 function extractPlaceId(url) {const match = url.match(/(?:\/\/|\b)(?:www\.)?(?:rblx\.games|roblox\.com)\/games\/(\d+)(?:\/|$|\?)/);return match ? match[1] : null;}
 function normalizeRobloxUrl(url) {const id = extractPlaceId(url);if (!id) return url.toLowerCase();return `https://www.roblox.com/games/${id}`;}
 
-function saveCache() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
-function loadCache() {const cachedData = localStorage.getItem('thumbnailCache');if (cachedData) thumbnailCache = new Map(Object.entries(JSON.parse(cachedData)));}
+function saveCache_n() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
+function loadCache_n() {const cachedData = localStorage.getItem('thumbnailCache');if (cachedData) thumbnailCache = new Map(Object.entries(JSON.parse(cachedData)));}
+// test
+function loadCache() {
+    const cacheData = localStorage.getItem('thumbnailCache');
+    if (cacheData) {
+        try {
+            const cache = JSON.parse(cacheData);
+            for (const [key, value] of Object.entries(cache)) {
+                thumbnailCache.set(key, value);
+            }
+            console.log(`Loaded ${thumbnailCache.size} thumbnails from cache`);
+        } catch (e) {
+            console.error('Failed to load thumbnail cache', e);
+        }
+    }
+}
+function saveCache() {
+    try {
+        const cacheObj = Object.fromEntries(thumbnailCache);
+        localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));
+    } catch (e) {
+        console.error('Failed to save thumbnail cache', e);
+    }
+}
+
 function clearThumbnailCache() {thumbnailCache.clear();}
 
 
@@ -105,10 +129,7 @@ function downloadData() {
     a.download = 'saved.json';
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, 100);
+    setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);
     play_sound("click.mp3");
 }
 
@@ -149,28 +170,9 @@ async function getThumbnailUrl(placeId, size = 256) {
 
 const BATCH_SIZE = 100;
 
-async function getThumbnailsBatch(placeIds, size = 256) {
+async function fetchThumbnailsBatch(placeIds, size = 256) {
     const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${placeIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
-    try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const results = new Map();
-        data.data.forEach(item => {
-            if (item.imageUrl) {
-                const cacheKey = `${item.placeId}_${size}`;
-                results.set(String(item.placeId), item.imageUrl);
-                thumbnailCache.set(cacheKey, item.imageUrl);
-            }
-        });
-        return results;
-    } catch (error) {
-        console.log("Batch request failed:", error.message);
-        return new Map();
-    }
-}
-
-async function fetchViaProxies(apiUrl) {
+    
     const PROXY_SERVERS = [
         "https://api.allorigins.win/raw?url=",
         "https://corsproxy.io/?",
@@ -179,23 +181,43 @@ async function fetchViaProxies(apiUrl) {
 
     for (const proxy of PROXY_SERVERS) {
         try {
-            const response = await fetch(proxy + encodeURIComponent(apiUrl));
-            if (!response.ok) continue;
+            const proxyUrl = proxy + encodeURIComponent(apiUrl);
+            console.log(`Trying proxy: ${proxyUrl}`);
+            
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                console.log(`Proxy ${proxy} returned status ${response.status}`);
+                continue;
+            }
+            
             const data = await response.json();
-            return data;
+            const results = new Map();
+            
+            if (data.data && Array.isArray(data.data)) {
+                data.data.forEach(item => {
+                    if (item.imageUrl) {
+                        const cacheKey = `${item.placeId}_${size}`;
+                        results.set(String(item.placeId), item.imageUrl);
+                        thumbnailCache.set(cacheKey, item.imageUrl);
+                    }
+                });
+                saveCache();
+                return results;
+            }
         } catch (e) {
             console.error(`Proxy error (${proxy}):`, e);
         }
     }
-    return null;
+    
+    console.error("All proxies failed for batch:", placeIds);
+    return new Map();
 }
-
-
 
 async function getThumbnailsUrls(placeIds, size = 256) {
     const results = new Map();
     const toFetch = [];
     
+    // Проверяем кэш
     placeIds.forEach(placeId => {
         const cacheKey = `${placeId}_${size}`;
         if (thumbnailCache.has(cacheKey)) {
@@ -205,10 +227,10 @@ async function getThumbnailsUrls(placeIds, size = 256) {
         }
     });
 
+    // Обрабатываем оставшиеся ID пачками
     for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
         const batch = toFetch.slice(i, i + BATCH_SIZE);
-        const batchResults = await getThumbnailsBatch(batch, size);
-        
+        const batchResults = await fetchThumbnailsBatch(batch, size);
         batchResults.forEach((url, id) => results.set(id, url));
     }
 
@@ -216,36 +238,42 @@ async function getThumbnailsUrls(placeIds, size = 256) {
 }
 
 
+
+
+
 async function loadThumbnails(placesToShow, startIndex) {
-    const validPlaces = [];
     const placeIds = [];
+    const imageElements = [];
+    
     placesToShow.forEach((place, localIndex) => {
         const globalIndex = startIndex + localIndex;
         const img = document.getElementById(`img-${globalIndex}`);
         if (!img) return;
-
+        
         img.src = 'data/needable/loading.png';
         
         if (!place.id || place.id.length < 7) {
             img.src = 'data/needable/NewFrontPageGuy.png';
         } else {
-            validPlaces.push({ place, img, globalIndex });
             placeIds.push(place.id);
+            imageElements.push({img, placeId: place.id});
         }
     });
 
     if (placeIds.length === 0) return;
+    
     const thumbnailsMap = await getThumbnailsUrls(placeIds);
     
-    validPlaces.forEach(({ place, img }) => {
-        const url = thumbnailsMap.get(place.id) || 'data/needable/NewFrontPageGuy.png';
+    imageElements.forEach(({img, placeId}) => {
+        const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
         img.src = url;
     });
 }
 
+// Функция загрузки "крутых" миниатюр
 async function loadCoolThumbnails(places) {
-    const validPlaces = [];
     const placeIds = [];
+    const imageElements = [];
     
     places.forEach(place => {
         if (!place.id || place.id.length < 7) return;
@@ -254,16 +282,16 @@ async function loadCoolThumbnails(places) {
         if (!img) return;
         
         img.src = 'data/needable/loading.png';
-        validPlaces.push({ place, img });
         placeIds.push(place.id);
+        imageElements.push({img, placeId: place.id});
     });
 
     if (placeIds.length === 0) return;
     
     const thumbnailsMap = await getThumbnailsUrls(placeIds, 512);
     
-    validPlaces.forEach(({ place, img }) => {
-        const url = thumbnailsMap.get(place.id) || 'data/needable/NewFrontPageGuy.png';
+    imageElements.forEach(({img, placeId}) => {
+        const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
         img.src = url;
     });
 }
@@ -586,49 +614,30 @@ function handleFileSelect(event) {
     renderPlaces();
     
     alert(`Succes import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
-} catch (error) {
-    console.error("Import Error:", error);
-    alert(`Import Error: ${error.message}\nCheck format file`);
+} catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck format file`);
 }
-    };
-    reader.readAsText(file);
-    play_sound("victory.mp3");
+    };reader.readAsText(file);play_sound("victory.mp3");
 }
 
 // MUSIC PLAYER
 const tracks = [
-    "data/needable/Audio/Michael%20Wyckoff%20-%20Keygen.mp3",
-    "data/needable/Audio/Roblox%20Monster%20Mash%20Potion%20Remix%20｜%20Classy%20Doge%20Remix.mp3",
-    "data/needable/Audio/Positively%20Dark-%20Awakening.mp3",
-    "data/needable/Audio/Ragnarok%20Online%20-%20Monastery%20in%20Disguise%20(Cursed%20Abbey⧸Monastery)%20HD.mp3",
-    "data/needable/Audio/old%20roblox%20dance｜Roblox.mp3",
-    "data/needable/Audio/M.U.L.E%20Theme%20(ROBLOX%20music).mp3",
-    "data/needable/Audio/Flight%20of%20the%20Bumblebee%20Roblox.mp3",
-    "data/needable/Audio/Caramelldansen%20-%20Supergott%20-%20Roblox%20Music.mp3",
-    "data/needable/Audio/Bossfight%20-%20Starship%20Showdown.mp3",
-    "data/needable/Audio/Bossfight%20-%20Milky%20Ways.mp3",
+    "data/needable/Audio/Michael%20Wyckoff%20-%20Keygen.mp3","data/needable/Audio/Roblox%20Monster%20Mash%20Potion%20Remix%20｜%20Classy%20Doge%20Remix.mp3",
+    "data/needable/Audio/Positively%20Dark-%20Awakening.mp3","data/needable/Audio/Ragnarok%20Online%20-%20Monastery%20in%20Disguise%20(Cursed%20Abbey⧸Monastery)%20HD.mp3",
+    "data/needable/Audio/old%20roblox%20dance｜Roblox.mp3","data/needable/Audio/M.U.L.E%20Theme%20(ROBLOX%20music).mp3",
+    "data/needable/Audio/Flight%20of%20the%20Bumblebee%20Roblox.mp3","data/needable/Audio/Caramelldansen%20-%20Supergott%20-%20Roblox%20Music.mp3",
+    "data/needable/Audio/Bossfight%20-%20Starship%20Showdown.mp3","data/needable/Audio/Bossfight%20-%20Milky%20Ways.mp3",
     "data/needable/Audio/Bossfight%20-%20Leaving%20Leafwood%20Forest.mp3",
-    "data/needable/Audio/Bossfight%20-%20Farbror%20Melker%20Fixar%20Fiskdamm%20(Fastbom%20Cover).mp3",
-    "data/needable/Audio/Bossfight%20-%20Commando%20Steve.mp3",
-    "data/needable/Audio/Bossfight%20-%20Captain%20Cool.mp3",
-    "data/needable/Audio/Better%20Off%20Alone%20-%20Glejs%20(Remix).mp3",
-    "data/needable/Audio/30.%20Roblox%20Soundtrack%20-%20Party%20Music%20(2008).mp3",
-    "data/needable/Audio/29.%20Roblox%20Soundtrack%20-%20Explore%20ROBLOX.mp3",
-    "data/needable/Audio/28.%20Roblox%20Soundtrack%20-%20Online%20Social%20Hangout.mp3",
-    "data/needable/Audio/23.%20Roblox%20Soundtrack%20-%20Tycoon%20Game.mp3",
-    "data/needable/Audio/19.%20Roblox%20Soundtrack%20-%20Santa's%20Winter%20Stronghold.mp3",
-    "data/needable/Audio/18.%20Roblox%20Soundtrack%20-%201x1x1x1's%20Creed.mp3",
+    "data/needable/Audio/Bossfight%20-%20Farbror%20Melker%20Fixar%20Fiskdamm%20(Fastbom%20Cover).mp3","data/needable/Audio/Bossfight%20-%20Commando%20Steve.mp3",
+    "data/needable/Audio/Bossfight%20-%20Captain%20Cool.mp3","data/needable/Audio/Better%20Off%20Alone%20-%20Glejs%20(Remix).mp3",
+    "data/needable/Audio/30.%20Roblox%20Soundtrack%20-%20Party%20Music%20(2008).mp3","data/needable/Audio/29.%20Roblox%20Soundtrack%20-%20Explore%20ROBLOX.mp3",
+    "data/needable/Audio/28.%20Roblox%20Soundtrack%20-%20Online%20Social%20Hangout.mp3","data/needable/Audio/23.%20Roblox%20Soundtrack%20-%20Tycoon%20Game.mp3",
+    "data/needable/Audio/19.%20Roblox%20Soundtrack%20-%20Santa's%20Winter%20Stronghold.mp3","data/needable/Audio/18.%20Roblox%20Soundtrack%20-%201x1x1x1's%20Creed.mp3",
     "data/needable/Audio/17.%20Roblox%20Soundtrack%20-%20Big%20Clan⧸Group%20Recruitment%20Centre%20Entrance.mp3",
-    "data/needable/Audio/16.%20Roblox%20Soundtrack%20-%20Heli%20Wars.mp3",
-    "data/needable/Audio/13.%20Roblox%20Soundtrack%20-%20Contest%20Time!.mp3",
-    "data/needable/Audio/11.%20Roblox%20Soundtrack%20-%20Clan%20Being%20Raided.mp3",
-    "data/needable/Audio/09.%20Roblox%20Soundtrack%20-%20Crossroads%20Times.mp3",
-    "data/needable/Audio/08.%20Roblox%20Soundtrack%20-%20Noob%20Alert.mp3",
-    "data/needable/Audio/07.%20Roblox%20Soundtrack%20-%20Trouble%20Ahead%20(BONUS%20SONG)%20(Teddy9340's%20Production).mp3",
-    "data/needable/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3",
-    "data/needable/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
-    "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3",
-    "data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3"
+    "data/needable/Audio/16.%20Roblox%20Soundtrack%20-%20Heli%20Wars.mp3","data/needable/Audio/13.%20Roblox%20Soundtrack%20-%20Contest%20Time!.mp3",
+    "data/needable/Audio/11.%20Roblox%20Soundtrack%20-%20Clan%20Being%20Raided.mp3","data/needable/Audio/09.%20Roblox%20Soundtrack%20-%20Crossroads%20Times.mp3",
+    "data/needable/Audio/08.%20Roblox%20Soundtrack%20-%20Noob%20Alert.mp3","data/needable/Audio/07.%20Roblox%20Soundtrack%20-%20Trouble%20Ahead%20(BONUS%20SONG)%20(Teddy9340's%20Production).mp3",
+    "data/needable/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3","data/needable/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
+    "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3"
 ];
 
 const audioPlayer = new Audio();
@@ -639,20 +648,13 @@ const volumeSlider = document.getElementById('volume-slider');
 const trackName = document.getElementById('track-name');
 const progressBar = document.getElementById('progress-bar');
 const errorMsg = document.getElementById('error-message');
-
 let currentTrackIndex = 0;
 let isPlaying = false;
 
-function decodeFileName(encoded) {
-    return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");
-}
+function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
 
 function loadRandomTrack() {
-    if (tracks.length === 0) {
-        errorMsg.textContent = "No tracks found";
-        return;
-    }
-    
+    if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}
     currentTrackIndex = Math.floor(Math.random() * tracks.length);
     const trackPath = tracks[currentTrackIndex];
     audioPlayer.src = trackPath;
@@ -662,78 +664,34 @@ function loadRandomTrack() {
 }
 
 function togglePlay() {
-    if (!audioPlayer.src) {
-        loadRandomTrack();
-    }
-    
-    if (isPlaying) {
-        audioPlayer.pause();
-        playBtn.textContent = "▶";
-    } else {
-        audioPlayer.play().then(() => {
-            playBtn.textContent = "⏸";
-        }).catch(error => {
-            errorMsg.textContent = "Playing error: " + error.message;
-            console.error("Playing error", error);
-        });
-    }
-    isPlaying = !isPlaying;
-    play_sound("click.mp3");
+    if (!audioPlayer.src) {loadRandomTrack();}
+    if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";
+    } else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});
+    }isPlaying = !isPlaying;play_sound("click.mp3");
 }
-
-function nextTrack() {
-    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-    loadRandomTrack();
-    if (isPlaying) {
-        audioPlayer.play().catch(e => {
-            errorMsg.textContent = "AutoPlay error: " + e.message;
-        });
-    }
-    play_sound("click.mp3");
-}
-
-function prevTrack() {
-    currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-    loadRandomTrack();
-    if (isPlaying) {
-        audioPlayer.play().catch(e => {
-            errorMsg.textContent = "AutoPlay error: " + e.message;
-        });
-    }
-    play_sound("click.mp3");
-}
+function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
+function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
 
 // EDIT MODE
 function deletePlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    if (index < 0 || index >= savedPlaces.length) {
-        console.error('Invalid index:', index);
-        return;
-    }
-    
-    if (!confirm(`Delete "${savedPlaces[index].name}"?`)) return;
-    
-    savedPlaces.splice(index, 1);
-    localStorage.setItem('places', JSON.stringify(savedPlaces));
-    renderPlaces();
-    play_sound("collide.mp3");
+    if (index < 0 || index >= savedPlaces.length) {console.error('Invalid index:', index);return;}
+    if (!confirm(`Delete "${savedPlaces[index].name}"?`)) return; 
+    savedPlaces.splice(index, 1);localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("collide.mp3");
 }
 
 function startEditPlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
     const place = savedPlaces[index];
     const placeElement = document.querySelector(`.place[data-id="${index}"]`);
-
     let categoryOptions = '';
     categories.forEach(cat => {
         if (cat === 'All') return;
-        
         const selected = (cat === 'None' && !place.category) || 
                          (cat === place.category);
         
         categoryOptions += `<option value="${cat}" ${selected ? 'selected' : ''}>${cat}</option>`;
     });
-    
     placeElement.innerHTML = `
         <div class="edit-form">
             <input type="text" id="edit-name-${index}" value="${place.name}" placeholder="Place Name">
@@ -751,27 +709,17 @@ function startEditPlace(index) {
 function saveEditedPlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
     const place = savedPlaces[index];
-    
     const newName = document.getElementById(`edit-name-${index}`).value;
     const newUrl = document.getElementById(`edit-url-${index}`).value;
     const newCategory = document.getElementById(`edit-category-${index}`).value;
-    
-    if (!newName || !newUrl) {
-        alert("Both fields are required!");
-        return;
-    }
-    
+    if (!newName || !newUrl) {alert("Both fields are required!");return;}
     const storeCategory = newCategory === 'None' ? '' : newCategory;
-    
     place.name = newName;
     place.url = newUrl;
     place.category = storeCategory;
     place.id = extractPlaceId(newUrl) || place.id;
     place.normalizedUrl = normalizeRobloxUrl(newUrl);
-    
-    localStorage.setItem('places', JSON.stringify(savedPlaces));
-    renderPlaces();
-    play_sound("splat.mp3");
+    localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("splat.mp3");
 }
 
 function clearForm() {
