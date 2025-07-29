@@ -162,44 +162,43 @@ async function getThumbnailUrl(placeId, size = 256) {
 }
 */
 
-const BATCH_SIZE = 100;
+
+const BATCH_SIZE = 5;
 
 async function fetchThumbnailsBatch(placeIds, size = 256) {
     const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${placeIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
-    
     const PROXY_SERVERS = [
-        "https://api.allorigins.win/raw?url=",
-        "https://corsproxy.io/?",
-        "https://api.codetabs.com/v1/proxy?quest="
+        "https://corsproxy.io/?" + encodeURIComponent(apiUrl),
+        "https://api.allorigins.win/raw?url=" + encodeURIComponent(apiUrl),
+        "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(apiUrl)
     ];
-
-    for (const proxy of PROXY_SERVERS) {
+    
+    for (const proxyUrl of PROXY_SERVERS) {
         try {
-            const proxyUrl = proxy + encodeURIComponent(apiUrl);
-            console.log(`Trying proxy: ${proxyUrl}`);
+            const response = await fetch(proxyUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
             
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                console.log(`Proxy ${proxy} returned status ${response.status}`);
-                continue;
-            }
-            
-            const data = await response.json();
-            const results = new Map();
-            
-            if (data.data && Array.isArray(data.data)) {
-                data.data.forEach(item => {
-                    if (item.imageUrl) {
-                        const cacheKey = `${item.placeId}_${size}`;
-                        results.set(String(item.placeId), item.imageUrl);
-                        thumbnailCache.set(cacheKey, item.imageUrl);
-                    }
-                });
-                saveCache();
-                return results;
+            if (response.ok) {
+                const data = await response.json();
+                const results = new Map();
+                
+                if (data.data && Array.isArray(data.data)) {
+                    data.data.forEach(item => {
+                        if (item.imageUrl) {
+                            const cacheKey = `${item.placeId}_${size}`;
+                            results.set(String(item.placeId), item.imageUrl);
+                            thumbnailCache.set(cacheKey, item.imageUrl);
+                        }
+                    });
+                    saveCache();
+                    return results;
+                }
             }
         } catch (e) {
-            console.error(`Proxy error (${proxy}):`, e);
+            console.error(`Proxy error:`, e);
         }
     }
     
@@ -210,6 +209,7 @@ async function fetchThumbnailsBatch(placeIds, size = 256) {
 async function getThumbnailsUrls(placeIds, size = 256) {
     const results = new Map();
     const toFetch = [];
+    
     placeIds.forEach(placeId => {
         const cacheKey = `${placeId}_${size}`;
         if (thumbnailCache.has(cacheKey)) {
@@ -218,8 +218,10 @@ async function getThumbnailsUrls(placeIds, size = 256) {
             toFetch.push(placeId);
         }
     });
-    for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
-        const batch = toFetch.slice(i, i + BATCH_SIZE);
+    
+
+    while (toFetch.length > 0) {
+        const batch = toFetch.splice(0, BATCH_SIZE);
         const batchResults = await fetchThumbnailsBatch(batch, size);
         batchResults.forEach((url, id) => results.set(id, url));
     }
@@ -227,31 +229,42 @@ async function getThumbnailsUrls(placeIds, size = 256) {
     return results;
 }
 
-
-
-
-
 async function loadThumbnails(placesToShow, startIndex) {
     const placeIds = [];
     const imageElements = [];
+    
     placesToShow.forEach((place, localIndex) => {
         const globalIndex = startIndex + localIndex;
         const img = document.getElementById(`img-${globalIndex}`);
         if (!img) return;
+        
         img.src = 'data/needable/loading.png';
-        if (!place.id || place.id.length < 7) {
+        img.onerror = () => {
             img.src = 'data/needable/NewFrontPageGuy.png';
-        } else {
+        };
+        
+        if (place.id && place.id.length >= 7) {
             placeIds.push(place.id);
             imageElements.push({img, placeId: place.id});
+        } else {
+            img.src = 'data/needable/NewFrontPageGuy.png';
         }
     });
+    
     if (placeIds.length === 0) return;
-    const thumbnailsMap = await getThumbnailsUrls(placeIds);
-    imageElements.forEach(({img, placeId}) => {
-        const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
-        img.src = url;
-    });
+    
+    try {
+        const thumbnailsMap = await getThumbnailsUrls(placeIds);
+        imageElements.forEach(({img, placeId}) => {
+            const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
+            img.src = url;
+        });
+    } catch (error) {
+        console.error("Error loading thumbnails:", error);
+        imageElements.forEach(({img}) => {
+            img.src = 'data/needable/NewFrontPageGuy.png';
+        });
+    }
 }
 
 async function loadCoolThumbnails(places) {
@@ -262,16 +275,30 @@ async function loadCoolThumbnails(places) {
         if (!place.id || place.id.length < 7) return;
         const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);
         if (!img) return;
+        
         img.src = 'data/needable/loading.png';
+        img.onerror = () => {
+            img.src = 'data/needable/NewFrontPageGuy.png';
+        };
+        
         placeIds.push(place.id);
         imageElements.push({img, placeId: place.id});
     });
+    
     if (placeIds.length === 0) return;
-    const thumbnailsMap = await getThumbnailsUrls(placeIds, 512);
-    imageElements.forEach(({img, placeId}) => {
-        const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
-        img.src = url;
-    });
+    
+    try {
+        const thumbnailsMap = await getThumbnailsUrls(placeIds, 512);
+        imageElements.forEach(({img, placeId}) => {
+            const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
+            img.src = url;
+        });
+    } catch (error) {
+        console.error("Error loading cool thumbnails:", error);
+        imageElements.forEach(({img}) => {
+            img.src = 'data/needable/NewFrontPageGuy.png';
+        });
+    }
 }
 
 let editMode = false;
