@@ -234,14 +234,11 @@ async function getThumbnailsUrls(placeIds, size = 256) {
 async function loadThumbnails(placesToShow, startIndex) {
     const placeIds = [];
     const imageElements = [];
-    
     placesToShow.forEach((place, localIndex) => {
         const globalIndex = startIndex + localIndex;
         const img = document.getElementById(`img-${globalIndex}`);
         if (!img) return;
-        
         img.src = 'data/needable/loading.png';
-        
         if (!place.id || place.id.length < 7) {
             img.src = 'data/needable/NewFrontPageGuy.png';
         } else {
@@ -249,11 +246,8 @@ async function loadThumbnails(placesToShow, startIndex) {
             imageElements.push({img, placeId: place.id});
         }
     });
-
     if (placeIds.length === 0) return;
-    
     const thumbnailsMap = await getThumbnailsUrls(placeIds);
-    
     imageElements.forEach(({img, placeId}) => {
         const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
         img.src = url;
@@ -266,19 +260,14 @@ async function loadCoolThumbnails(places) {
     
     places.forEach(place => {
         if (!place.id || place.id.length < 7) return;
-        
         const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);
         if (!img) return;
-        
         img.src = 'data/needable/loading.png';
         placeIds.push(place.id);
         imageElements.push({img, placeId: place.id});
     });
-
     if (placeIds.length === 0) return;
-    
     const thumbnailsMap = await getThumbnailsUrls(placeIds, 512);
-    
     imageElements.forEach(({img, placeId}) => {
         const url = thumbnailsMap.get(placeId) || 'data/needable/NewFrontPageGuy.png';
         img.src = url;
