@@ -187,10 +187,6 @@ function renderPlaces() {
 }
 
 
-
-
-
-
 function renderPagination(totalPages) {
     const container = document.getElementById('paginationContainer');
     if (totalPages <= 1) {container.innerHTML = '';return;}
@@ -206,29 +202,20 @@ function changePage(newPage) {currentPage = newPage;renderPlaces();play_sound("p
 
 function clearAllPlaces() {
     if (confirm("Are you sure you want to delete ALL saved places? This action cannot be undone!")) {
-        localStorage.removeItem('places');
-        localStorage.removeItem('categories');
-        clearThumbnailCache();
-        renderPlaces();
-        play_sound("collide.mp3");
+        localStorage.removeItem('places');localStorage.removeItem('categories');
+        clearThumbnailCache();renderPlaces();play_sound("collide.mp3");
     }
 }
 
 function setRandomBanner() {
     const defaultBanners = [
-        "data/needable/banners/2007ChristmasBanner.webp",
-        "data/needable/banners/2007HalloweenBanner.webp",
-        "data/needable/banners/2008NoLogoBanner.webp",
-        "data/needable/banners/BuildermanBanner.webp",
+        "data/needable/banners/2007ChristmasBanner.webp","data/needable/banners/2007HalloweenBanner.webp",
+        "data/needable/banners/2008NoLogoBanner.webp","data/needable/banners/BuildermanBanner.webp",
         "data/needable/banners/ChristmasBanner2008.webp"
     ];
-    
     try {
-        const customBanners = JSON.parse(localStorage.getItem('customBanners')) || [];
-        const banners = customBanners.length > 0 ? customBanners : defaultBanners;
-        const randomBanner = banners[Math.floor(Math.random() * banners.length)];
-        const header = document.querySelector('.banner');
-        
+        const customBanners = JSON.parse(localStorage.getItem('customBanners')) || [];const banners = customBanners.length > 0 ? customBanners : defaultBanners;
+        const randomBanner = banners[Math.floor(Math.random() * banners.length)];const header = document.querySelector('.banner');
         if (header) {
             header.style.backgroundImage = `url('${randomBanner}')`;
             header.style.backgroundSize = 'cover';
@@ -236,33 +223,18 @@ function setRandomBanner() {
             header.style.backgroundRepeat = 'no-repeat';
             header.style.transition = 'background-image 0.5s ease-in-out';
         }
-    } catch (error) {
-        console.error('Error setting banner:', error);
-        const header = document.querySelector('.banner');
-        if (header) {
-            header.style.backgroundImage = "url('data/needable/NewFrontPageGuy.png')";
-        }
-    }
+    } catch (error) {console.error('Error setting banner:', error);const header = document.querySelector('.banner');if (header) {header.style.backgroundImage = "url('data/needable/NewFrontPageGuy.png')";}}
 }
 
-// USERPLACES
+
+// USERPLACES --------------------------------------------------------------------------------
 let coolPlacesHistory = [];
 let currentCoolIndex = -1;
-
 function updateCoolPlaces() {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    const container = document.querySelector('.UserPlaces');
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const container = document.querySelector('.UserPlaces');
     container.innerHTML = '';
-    
-    if (savedPlaces.length === 0) {
-        for (let i = 0; i < 5; i++) {
-            container.innerHTML += `<div class='UserPlace'><a href=''><img src='data/needable/loading.png'><br></a></div>`;
-        }
-        return;
-    }
-    
+    if (savedPlaces.length === 0) {for (let i = 0; i < 5; i++) {container.innerHTML += `<div class='UserPlace'><a href=''><img src='data/needable/loading.png'><br></a></div>`;}return;}
     const currentSet = coolPlacesHistory[currentCoolIndex] || [];
-    
     currentSet.forEach(place => {
         container.innerHTML += `
             <div class='UserPlace'>
@@ -274,125 +246,63 @@ function updateCoolPlaces() {
                 </a>
             </div>
         `;
-    });
-    
-    loadCoolThumbnails(currentSet);
+    });loadCoolThumbnails(currentSet);
 }
 
 function generateRandomPlaces() {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    if (savedPlaces.length <= 5) return [...savedPlaces];
-    
-    const randomPlaces = [];
-    const indices = new Set();
-    
-    while (indices.size < 5) {
-        const randomIndex = Math.floor(Math.random() * savedPlaces.length);
-        if (!indices.has(randomIndex)) {
-            indices.add(randomIndex);
-            randomPlaces.push(savedPlaces[randomIndex]);
-        }
-    }
-    
+    const savedPlaces=JSON.parse(localStorage.getItem('places')) || [];if (savedPlaces.length <= 5) return [...savedPlaces];
+    const randomPlaces=[];const indices=new Set();
+    while (indices.size < 5) {const randomIndex = Math.floor(Math.random() * savedPlaces.length);if (!indices.has(randomIndex)) {indices.add(randomIndex);randomPlaces.push(savedPlaces[randomIndex]);}}
     return randomPlaces;
 }
-
 function nextCoolSet() {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    if (savedPlaces.length === 0) return;
-    
-    const newSet = generateRandomPlaces();
-    coolPlacesHistory = coolPlacesHistory.slice(0, currentCoolIndex + 1);
-    coolPlacesHistory.push(newSet);
-    currentCoolIndex = coolPlacesHistory.length - 1;
-    
-    updateCoolPlaces();
-    updateCoolNavigation();
-    play_sound("click.mp3");
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];if (savedPlaces.length === 0) return;const newSet = generateRandomPlaces();
+    coolPlacesHistory = coolPlacesHistory.slice(0, currentCoolIndex + 1);coolPlacesHistory.push(newSet);currentCoolIndex = coolPlacesHistory.length - 1;
+    updateCoolPlaces();updateCoolNavigation();play_sound("click.mp3");
 }
+function prevCoolSet() {if (currentCoolIndex > 0) {currentCoolIndex--;updateCoolPlaces();updateCoolNavigation();}play_sound("click.mp3");}
+function updateCoolNavigation() {const prevBtn = document.getElementById('prevCoolBtn');const nextBtn = document.getElementById('nextCoolBtn');prevBtn.disabled = currentCoolIndex <= 0;nextBtn.disabled = false;}
+// --------------------------------------------------------------------------------
 
-function prevCoolSet() {
-    if (currentCoolIndex > 0) {
-        currentCoolIndex--;
-        updateCoolPlaces();
-        updateCoolNavigation();
-    }
-    play_sound("click.mp3");
-}
-
-function updateCoolNavigation() {
-    const prevBtn = document.getElementById('prevCoolBtn');
-    const nextBtn = document.getElementById('nextCoolBtn');
-    prevBtn.disabled = currentCoolIndex <= 0;
-    nextBtn.disabled = false;
-}
 
 function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
+    const file=event.target.files[0];if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const importedPlaces = JSON.parse(e.target.result);
-            if (!Array.isArray(importedPlaces)) {
-                alert("Error: no data");
-                return;
-            }
-            
+            if (!Array.isArray(importedPlaces)) {alert("Error: no data");return;}
             const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-            let duplicates = 0;
-            let imported = 0;
-            
+            let duplicates = 0;let imported = 0;
     importedPlaces.forEach(place => {
-        if (!place.url || !place.name) {
-            console.warn("Missed url or name:", place);
-            return;
-        }
-        
+        if (!place.url || !place.name) {console.warn("Missed url or name:",place);return;}
         const id = place.id || extractPlaceId(place.url);
         const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
-        
         const isDuplicate = savedPlaces.some(savedPlace => {
             return (id && savedPlace.id === id) || 
                    savedPlace.normalizedUrl === normalizedUrl ||
                    normalizeRobloxUrl(savedPlace.url) === normalizedUrl;
         });
-        
-        if (isDuplicate) {
-            duplicates++;
+        if (isDuplicate) {duplicates++;
         } else {
             let category = place.category || '';
             const completePlace = {
-                id,
-                name: place.name,
-                url: place.url,
-                category,
-                normalizedUrl,
-                date: place.date || new Date().toLocaleString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }).replace(',', '')
+                id,name:place.name,url:place.url,category,normalizedUrl,
+                date: place.date || new Date().toLocaleString('en-GB', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')
             };
             savedPlaces.push(completePlace);
             imported++;
         }
     });
-    
     localStorage.setItem('places', JSON.stringify(savedPlaces));
     currentPage = Math.floor(savedPlaces.length / itemsPerPage);
     renderPlaces();
-    
     alert(`Succes import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
-} catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck format file`);
-}
+    } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck format file`);}
     };reader.readAsText(file);play_sound("victory.mp3");
 }
 
-// MUSIC PLAYER
+// MUSIC PLAYER --------------------------------------------------------------------------------
 const tracks = [
     "data/needable/Audio/Michael%20Wyckoff%20-%20Keygen.mp3","data/needable/Audio/Roblox%20Monster%20Mash%20Potion%20Remix%20｜%20Classy%20Doge%20Remix.mp3",
     "data/needable/Audio/Positively%20Dark-%20Awakening.mp3","data/needable/Audio/Ragnarok%20Online%20-%20Monastery%20in%20Disguise%20(Cursed%20Abbey⧸Monastery)%20HD.mp3",
@@ -412,30 +322,16 @@ const tracks = [
     "data/needable/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3","data/needable/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
     "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3"
 ];
-
-const audioPlayer = new Audio();
-const playBtn = document.getElementById('play-btn');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-const volumeSlider = document.getElementById('volume-slider');
-const trackName = document.getElementById('track-name');
-const progressBar = document.getElementById('progress-bar');
-const errorMsg = document.getElementById('error-message');
-let currentTrackIndex = 0;
-let isPlaying = false;
-
+const audioPlayer=new Audio();
+const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
+const volumeSlider=document.getElementById('volume-slider');const trackName = document.getElementById('track-name');
+const progressBar=document.getElementById('progress-bar');const errorMsg = document.getElementById('error-message');
+let currentTrackIndex=0;let isPlaying=false;
 function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
-
 function loadRandomTrack() {
-    if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}
-    currentTrackIndex = Math.floor(Math.random() * tracks.length);
-    const trackPath = tracks[currentTrackIndex];
-    audioPlayer.src = trackPath;
-    trackName.textContent = decodeFileName(trackPath);
-    progressBar.style.width = '0%';
-    audioPlayer.load();
+    if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}currentTrackIndex = Math.floor(Math.random() * tracks.length);
+    const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();
 }
-
 function togglePlay() {
     if (!audioPlayer.src) {loadRandomTrack();}
     if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";
@@ -444,19 +340,18 @@ function togglePlay() {
 }
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
+// --------------------------------------------------------------------------------
 
-// EDIT MODE
+
+
+// EDIT MODE --------------------------------------------------------------------------------
 function deletePlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    if (index < 0 || index >= savedPlaces.length) {console.error('Invalid index:', index);return;}
-    if (!confirm(`Delete "${savedPlaces[index].name}"?`)) return; 
+    if (index < 0 || index >= savedPlaces.length) {console.error('Invalid index:', index);return;}if (!confirm(`Delete "${savedPlaces[index].name}"?`)) return; 
     savedPlaces.splice(index, 1);localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("collide.mp3");
 }
-
 function startEditPlace(index) {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    const place = savedPlaces[index];
-    const placeElement = document.querySelector(`.place[data-id="${index}"]`);
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const place = savedPlaces[index];const placeElement = document.querySelector(`.place[data-id="${index}"]`);
     let categoryOptions = '';
     categories.forEach(cat => {
         if (cat === 'All') return;
@@ -475,33 +370,20 @@ function startEditPlace(index) {
             <button onclick="saveEditedPlace(${index})">Save</button>
             <button onclick="renderPlaces()">Cancel</button>
         </div>
-    `;
-    play_sound("bass.mp3");
+    `;play_sound("bass.mp3");
 }
-
 function saveEditedPlace(index) {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    const place = savedPlaces[index];
-    const newName = document.getElementById(`edit-name-${index}`).value;
-    const newUrl = document.getElementById(`edit-url-${index}`).value;
-    const newCategory = document.getElementById(`edit-category-${index}`).value;
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const place = savedPlaces[index];
+    const newName = document.getElementById(`edit-name-${index}`).value;const newUrl = document.getElementById(`edit-url-${index}`).value;const newCategory = document.getElementById(`edit-category-${index}`).value;
     if (!newName || !newUrl) {alert("Both fields are required!");return;}
     const storeCategory = newCategory === 'None' ? '' : newCategory;
-    place.name = newName;
-    place.url = newUrl;
-    place.category = storeCategory;
-    place.id = extractPlaceId(newUrl) || place.id;
-    place.normalizedUrl = normalizeRobloxUrl(newUrl);
+    place.name = newName;place.url = newUrl;place.category = storeCategory;place.id = extractPlaceId(newUrl) || place.id;place.normalizedUrl = normalizeRobloxUrl(newUrl);
     localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("splat.mp3");
 }
+// --------------------------------------------------------------------------------
+
 
 function clearForm() {document.getElementById('placeName').value = '';document.getElementById('placeUrl').value = '';document.getElementById('placeCategory').value = 'None';}
-
-
-
-
-
-
 
 function loadDefaultList() {
     fetch('My_Fav_List.json')
@@ -529,33 +411,14 @@ function loadDefaultList() {
 
 window.onload = function() {
     initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
-
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
-    document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);
-    document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
+    document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
-    
-    playBtn.addEventListener('click', togglePlay);
-    nextBtn.addEventListener('click', nextTrack);
-    prevBtn.addEventListener('click', prevTrack);
-
+    playBtn.addEventListener('click', togglePlay);nextBtn.addEventListener('click', nextTrack);prevBtn.addEventListener('click', prevTrack);
     volumeSlider.addEventListener('input', () => {audioPlayer.volume = volumeSlider.value;});
-    
-    audioPlayer.addEventListener('timeupdate', () => {
-        if (!audioPlayer.duration) return;
-        const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-        progressBar.style.width = `${progress}%`;
-    });
+    audioPlayer.addEventListener('timeupdate', () => {if (!audioPlayer.duration) return;const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;progressBar.style.width = `${progress}%`;});
     audioPlayer.addEventListener('ended', nextTrack);
-    audioPlayer.addEventListener('error', () => {
-        errorMsg.textContent = `Error loading: ${audioPlayer.error ? audioPlayer.error.message : 'Unknown error'}`;
-        setTimeout(nextTrack, 2000);
-    });
-    document.querySelector('.progress').addEventListener('click', (e) => {
-        if (!audioPlayer.duration) return;
-        const progressWidth = e.currentTarget.clientWidth;
-        const clickPosition = e.offsetX;
-        audioPlayer.currentTime = (clickPosition / progressWidth) * audioPlayer.duration;
-    });
+    audioPlayer.addEventListener('error', () => {errorMsg.textContent = `Error loading: ${audioPlayer.error ? audioPlayer.error.message : 'Unknown error'}`;setTimeout(nextTrack, 2000);});
+    document.querySelector('.progress').addEventListener('click',(e) => {if (!audioPlayer.duration) return;const progressWidth=e.currentTarget.clientWidth;const clickPosition=e.offsetX;audioPlayer.currentTime=(clickPosition / progressWidth) * audioPlayer.duration;});
     loadRandomTrack();
 };
