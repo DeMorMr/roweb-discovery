@@ -433,7 +433,7 @@ function renderPlaces() {
         container.innerHTML += `
         <div class="place" data-id="${globalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
-                <img id="img-${globalIndex}" src="data/needable/loading.png" alt="${place.name}" loading="lazy" decoding="async">
+                <img id="img-${globalIndex}" src="data/needable/loading.png" alt="${place.name}" decoding="async">
                 ${editMode ? '' : `<br><t><small>${place.name}</small></t><br>`}
             </a>
             ${editMode ? `
