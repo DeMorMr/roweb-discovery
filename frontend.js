@@ -185,42 +185,43 @@ async function getThumbnail(placeId, size = 256, isCool = false) {
     if (thumbnailCache.has(cacheKey)) {
         return thumbnailCache.get(cacheKey);
     }
+
     const imageType = isCool ? 'gameshot' : 'gameicon';
     const apiUrl = `https://thumbnails.roblox.com/v1/places/${imageType}?placeIds=${placeId}&size=${size}x${size}&format=Png&isCircular=false`;
-
-    try {
-        const response = await fetch(apiUrl);
-        if (response.ok) {
-            const data = await response.json();
-            if (data.data?.[0]?.imageUrl) {
-                thumbnailCache.set(cacheKey, data.data[0].imageUrl);
-                return data.data[0].imageUrl;
-            }
+    
+    const methods = [
+        async () => {
+            const response = await fetch(apiUrl);
+            return response.ok ? response.json() : null;
+        },
+        async () => {
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${apiUrl}`;
+            const response = await fetch(proxyUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            return response.ok ? response.json() : null;
+        },
+        async () => {
+            const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(apiUrl)}`;
+            const response = await fetch(proxyUrl);
+            return response.ok ? response.json() : null;
         }
-    } catch (error) {
-        console.log("Direct request failed, trying proxies...");
-    }
-    const PROXY_SERVERS = [
-        "https://corsproxy.io/?",
-        "https://api.allorigins.win/raw?url=",
-        "https://proxy.cors.sh/?"
     ];
 
-    for (const proxy of PROXY_SERVERS) {
+    for (const method of methods) {
         try {
-            const proxyUrl = proxy + encodeURIComponent(apiUrl);
-            const response = await fetch(proxyUrl);
-            if (!response.ok) continue;
-            
-            const data = await response.json();
-            if (data.data?.[0]?.imageUrl) {
+            const data = await method();
+            if (data?.data?.[0]?.imageUrl) {
                 thumbnailCache.set(cacheKey, data.data[0].imageUrl);
                 return data.data[0].imageUrl;
             }
-        } catch (e) {
-            console.error(`Proxy error (${proxy}):`, e);
+        } catch (error) {
+            console.warn(`Method failed: ${error}`);
         }
     }
+
     const fallback = 'data/needable/NewFrontPageGuy.png';
     thumbnailCache.set(cacheKey, fallback);
     return fallback;
