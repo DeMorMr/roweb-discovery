@@ -178,13 +178,12 @@ async function getThumbnailUrl(placeId, size = 256) {
 
 // Thumbnails
 const thumbnailCache = new Map();
-const BATCH_SIZE = 10; // Максимальное количество ID за один запрос (можно увеличить до 100, если API позволяет)
+const BATCH_SIZE = 10;
 
 async function getBatchThumbnailUrls(placeIds, size = 256) {
     const uncachedIds = [];
     const result = {};
     
-    // Проверяем кэш для каждого ID
     placeIds.forEach(id => {
         const cacheKey = `${id}_${size}`;
         if (thumbnailCache.has(cacheKey)) {
@@ -225,8 +224,7 @@ async function getBatchThumbnailUrls(placeIds, size = 256) {
             console.error(`Proxy error (${proxy}):`, e);
         }
     }
-    
-    // Если не удалось загрузить, сохраняем null в кэш для каждого ID
+
     uncachedIds.forEach(id => {
         const cacheKey = `${id}_${size}`;
         thumbnailCache.set(cacheKey, null);
@@ -248,12 +246,10 @@ async function loadThumbnails(placesToShow, startIndex) {
         if (placeIds.length === 0) continue;
         try {
             const thumbnails = await getBatchThumbnailUrls(placeIds);
-            
             batch.forEach((place, localIndex) => {
                 const globalIndex = startIndex + i + localIndex;
                 const img = document.getElementById(`img-${globalIndex}`);
                 if (!img) return;
-                
                 img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';
             });
         } catch (error) {
