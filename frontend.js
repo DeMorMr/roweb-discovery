@@ -1,146 +1,81 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
 function play_sound(name) {var audio = new Audio();audio.src = 'data/needable/sounds/' + name;audio.autoplay = true;return true;}
-
-function switchdiv(hideId, showId, displayType = 'block') {
-    const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);
-    if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;
-    play_sound("click.mp3");
-}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
-
-
-
-let currentPage = 0;
-const itemsPerPage = 15;
+function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;play_sound("click.mp3");}
 
 function extractPlaceId(url) {const match = url.match(/(?:\/\/|\b)(?:www\.)?(?:rblx\.games|roblox\.com)\/games\/(\d+)(?:\/|$|\?)/);return match ? match[1] : null;}
 function normalizeRobloxUrl(url) {const id = extractPlaceId(url);if (!id) return url.toLowerCase();return `https://www.roblox.com/games/${id}`;}
 
-function saveCache_n() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
-function loadCache_n() {const cachedData = localStorage.getItem('thumbnailCache');if (cachedData) thumbnailCache = new Map(Object.entries(JSON.parse(cachedData)));}
-// test
+
+// --------------------------------------------------------------------------------
+function saveCache_just() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
+function loadCache_just() {const cachedData = localStorage.getItem('thumbnailCache');if (cachedData) thumbnailCache = new Map(Object.entries(JSON.parse(cachedData)));}
 function loadCache() {
     const cacheData = localStorage.getItem('thumbnailCache');
     if (cacheData) {
-        try {
-            const cache = JSON.parse(cacheData);
-            for (const [key, value] of Object.entries(cache)) {
-                thumbnailCache.set(key, {
-                    url: value,
-                    timestamp: Date.now()
-                });
-            }
-            console.log(`Loaded ${thumbnailCache.size} thumbnails from cache`);
-        } catch (e) {
-            console.error('Failed to load thumbnail cache', e);
-        }
+        try {const cache = JSON.parse(cacheData);for (const [key, value] of Object.entries(cache)) {thumbnailCache.set(key, {url:value,timestamp:Date.now()});}console.log(`Loaded ${thumbnailCache.size} thumbnails from cache`);
+        } catch (e) {console.error('Failed to load thumbnail cache', e);}
     }
 }
-
 function saveCache() {
     if (thumbnailCache.size > 500) {
         const entries = [...thumbnailCache.entries()]
             .sort((a, b) => b[1].timestamp - a[1].timestamp)
             .slice(0, 300);
-        
-        thumbnailCache.clear();
-        entries.forEach(([key, value]) => thumbnailCache.set(key, value));
-    }
-    
-    localStorage.setItem('thumbnailCache', JSON.stringify(
-        Object.fromEntries([...thumbnailCache.entries()].map(([k, v]) => [k, v?.url || null]))
-    ));
+        thumbnailCache.clear();entries.forEach(([key, value]) => thumbnailCache.set(key, value));
+    }localStorage.setItem('thumbnailCache', JSON.stringify(Object.fromEntries([...thumbnailCache.entries()].map(([k, v]) => [k, v?.url || null]))));
 }
-
 function clearThumbnailCache() {thumbnailCache.clear();}
+// --------------------------------------------------------------------------------
 
 
+// --------------------------------------------------------------------------------
 let categories = ['All', 'Adventure', 'Tycoon', 'Roleplay', 'Obby', 'Shooter'];
 function initCategories() {
     const savedCategories = JSON.parse(localStorage.getItem('categories'));
-    if (savedCategories && savedCategories.length > 0) {categories = savedCategories;}
-    if (!categories.includes('All')) categories.unshift('All');
-    if (!categories.includes('None')) categories.push('None');
+    if (savedCategories && savedCategories.length > 0) {categories = savedCategories;}if (!categories.includes('All')) categories.unshift('All');if (!categories.includes('None')) categories.push('None');
     localStorage.setItem('categories', JSON.stringify(categories));
 }
 function saveCategory() {
     const newCategory = document.getElementById('newCategory').value.trim();
-    if (!newCategory) {alert("Please enter a category name!");play_sound("ouch.mp3");return;}
-    if (newCategory.length > 10) {alert("Place name cannot exceed 10 characters!");play_sound("ouch.mp3");return;}
-    if (newCategory === 'All' || newCategory === 'None') {alert("Category name cannot be 'All' or 'None'!");return;}
-    if (categories.includes(newCategory)) {alert("This category already exists!");return;}
-    categories.push(newCategory);
-    localStorage.setItem('categories', JSON.stringify(categories));
-    document.getElementById('newCategory').value = '';
+    if (!newCategory) {alert("Please enter a category name!");play_sound("ouch.mp3");return;}if (newCategory.length > 10) {alert("Place name cannot exceed 10 characters!");play_sound("ouch.mp3");return;}
+    if (newCategory === 'All' || newCategory === 'None') {alert("Category name cannot be 'All' or 'None'!");return;}if (categories.includes(newCategory)) {alert("This category already exists!");return;}
+    categories.push(newCategory);localStorage.setItem('categories', JSON.stringify(categories));document.getElementById('newCategory').value = '';
     populateCategoryDropdowns();play_sound("splat.mp3");
 }
 function populateCategoryDropdowns() {
-    const categorySelect = document.getElementById('placeCategory');
-    const filterSelect = document.getElementById('categoryFilter');
+    const categorySelect = document.getElementById('placeCategory');const filterSelect = document.getElementById('categoryFilter');
     [categorySelect, filterSelect].forEach(select => {
         select.innerHTML = '';
         categories.forEach(category => {
             if (select === categorySelect && category === 'All') return;
             const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            select.appendChild(option);
-        });
-    });
-    categorySelect.value = 'None';filterSelect.value = 'All';
+            option.value = category;option.textContent = category;select.appendChild(option);
+        });});categorySelect.value = 'None';filterSelect.value = 'All';
 }
+// --------------------------------------------------------------------------------
 
+
+
+// --------------------------------------------------------------------------------
 function savePlace() {
-    const name = document.getElementById('placeName').value;
-    const url = document.getElementById('placeUrl').value;
-    const category = document.getElementById('placeCategory').value;
-    if (name.length > 50) {alert("Place name cannot exceed 39 characters!");play_sound("ouch.mp3");return;}
-    if (!name || !url) {alert("Please fill both fields!");play_sound("ouch.mp3");return;}
-    let id = extractPlaceId(url);
-    if (!id) {const numMatch = url.match(/\b(\d+)\b/);if (numMatch && numMatch[1].length >= 7) {id = numMatch[1];}}
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    const normalizedUrl = normalizeRobloxUrl(url);
-    const isDuplicate = savedPlaces.some(place => {
-        if (id && place.id && place.id === id) return true;
-        const placeNormalizedUrl = normalizeRobloxUrl(place.url);
-        return placeNormalizedUrl === normalizedUrl;
-    });
-    if (isDuplicate) {alert("This place is already saved!");return;}
-    const storeCategory = category === 'None' ? '' : category;
-    const place = {
-        id,
-        name,
-        url,
-        category: storeCategory,
-        normalizedUrl: normalizedUrl,
-        date: new Date().toLocaleString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(',', '')
-    };
-    savedPlaces.push(place);
-    localStorage.setItem('places', JSON.stringify(savedPlaces));
-    play_sound("splat.mp3");
-    renderPlaces();
-    clearForm();
+    const name=document.getElementById('placeName').value;const url=document.getElementById('placeUrl').value;const category=document.getElementById('placeCategory').value;
+    if (name.length > 50) {alert("Place name cannot exceed 39 characters!");play_sound("ouch.mp3");return;}if (!name || !url) {alert("Please fill both fields!");play_sound("ouch.mp3");return;}
+    let id=extractPlaceId(url);if (!id) {const numMatch = url.match(/\b(\d+)\b/);if (numMatch && numMatch[1].length >= 7) {id = numMatch[1];}}
+    const savedPlaces=JSON.parse(localStorage.getItem('places')) || [];const normalizedUrl=normalizeRobloxUrl(url);
+    const isDuplicate=savedPlaces.some(place => {if (id && place.id && place.id === id) return true;const placeNormalizedUrl = normalizeRobloxUrl(place.url);return placeNormalizedUrl === normalizedUrl;});
+    if (isDuplicate) {alert("This place is already saved!");return;}const storeCategory = category === 'None' ? '' : category;
+    const place = {id,name,url,category:storeCategory,normalizedUrl:normalizedUrl,date:new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')};
+    savedPlaces.push(place);localStorage.setItem('places', JSON.stringify(savedPlaces));play_sound("splat.mp3");renderPlaces();clearForm();
 }
-
 function downloadData() {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    const dataStr = JSON.stringify(savedPlaces, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'saved.json';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);
-    play_sound("click.mp3");
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const dataStr = JSON.stringify(savedPlaces, null, 2);
+    const blob = new Blob([dataStr], {type: 'application/json'});const url = URL.createObjectURL(blob);const a = document.createElement('a');a.href = url;a.download = 'saved.json';
+    document.body.appendChild(a);a.click();setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);play_sound("click.mp3");
 }
+// --------------------------------------------------------------------------------
+
+
 
 
 /* BACKUP!!!
@@ -176,131 +111,63 @@ async function getThumbnailUrl(placeId, size = 256) {
 }
 */
 
-// Thumbnails
-const thumbnailCache = new Map();
-const BATCH_SIZE = 10;
 
+
+
+// Thumbnails --------------------------------------------------------------------------------
+const thumbnailCache = new Map();const BATCH_SIZE = 10;
 async function getBatchThumbnailUrls(placeIds, size = 256) {
-    const uncachedIds = [];
-    const result = {};
-    
-    placeIds.forEach(id => {
-        const cacheKey = `${id}_${size}`;
-        if (thumbnailCache.has(cacheKey)) {
-            result[id] = thumbnailCache.get(cacheKey);
-        } else {
-            uncachedIds.push(id);
-        }
-    });
-    
+    const uncachedIds = [];const result = {};placeIds.forEach(id => {const cacheKey = `${id}_${size}`;if (thumbnailCache.has(cacheKey)) {result[id] = thumbnailCache.get(cacheKey);} else {uncachedIds.push(id);}});
     if (uncachedIds.length === 0) return result;
-    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];
-    const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
+    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
     for (const proxy of PROXY_SERVERS) {
         try {
-            const response = await fetch(proxy + encodeURIComponent(apiUrl));
-            if (!response.ok) continue;
-            const data = await response.json();
-            if (data.data && Array.isArray(data.data)) {
-                data.data.forEach(item => {
-                    if (item.imageUrl) {const cacheKey = `${item.targetId}_${size}`;thumbnailCache.set(cacheKey, item.imageUrl);result[item.targetId] = item.imageUrl;}
-                });return result;
-            }
+            const response = await fetch(proxy + encodeURIComponent(apiUrl));if (!response.ok) continue;const data = await response.json();
+            if (data.data && Array.isArray(data.data)) {data.data.forEach(item => {if (item.imageUrl) {const cacheKey = `${item.targetId}_${size}`;thumbnailCache.set(cacheKey, item.imageUrl);result[item.targetId] = item.imageUrl;}});return result;}
         } catch (e) {console.error(`Proxy error (${proxy}):`, e);}
-    }uncachedIds.forEach(id => {const cacheKey = `${id}_${size}`;thumbnailCache.set(cacheKey, null);result[id] = null;});return result;
+    }uncachedIds.forEach(id => {const cacheKey=`${id}_${size}`;thumbnailCache.set(cacheKey, null);result[id] = null;});return result;
 }
-
 async function loadThumbnails(placesToShow, startIndex) {
     for (let i = 0; i < placesToShow.length; i += BATCH_SIZE) {
-        const batch = placesToShow.slice(i, i + BATCH_SIZE);
-        const placeIds = batch.map(place => place.id).filter(id => id && id.length >= 7);
-        batch.forEach((place, localIndex) => {
-            const globalIndex = startIndex + i + localIndex;
-            const img = document.getElementById(`img-${globalIndex}`);
-            if (img) img.src = 'data/needable/loading.png';
-        });
+        const batch = placesToShow.slice(i, i + BATCH_SIZE);const placeIds = batch.map(place => place.id).filter(id => id && id.length >= 7);
+        batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/loading.png';});
         if (placeIds.length === 0) continue;
-        try {
-            const thumbnails = await getBatchThumbnailUrls(placeIds);
-            batch.forEach((place, localIndex) => {
-                const globalIndex = startIndex + i + localIndex;
-                const img = document.getElementById(`img-${globalIndex}`);
-                if (!img) return;
-                img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';
-            });
-        } catch (error) {
-            console.error('Thumbnail batch error:', error);
-            batch.forEach((place, localIndex) => {
-                const globalIndex = startIndex + i + localIndex;
-                const img = document.getElementById(`img-${globalIndex}`);
-                if (img) img.src = 'data/needable/NewFrontPageGuy.png';
-            });
-        }
+        try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';});
+        } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
     }
 }
 async function loadCoolThumbnails(places) {
     for (let i = 0; i < places.length; i += BATCH_SIZE) {
-        const batch = places.slice(i, i + BATCH_SIZE);
-        const validPlaces = batch.filter(place => place.id && place.id.length >= 7);
-        const placeIds = validPlaces.map(place => place.id);
-        validPlaces.forEach(place => {
-            const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);
-            if (img) img.src = 'data/needable/loading.png';
-        });
+        const batch = places.slice(i, i + BATCH_SIZE);const validPlaces = batch.filter(place => place.id && place.id.length >= 7);const placeIds = validPlaces.map(place => place.id);
+        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.png';});
         if (placeIds.length === 0) continue;
-        try {
-            const thumbnails = await getBatchThumbnailUrls(placeIds, 512);
-            validPlaces.forEach(place => {
-                const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);
-                if (img) {
-                    img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';
-                }
-            });
-        } catch (error) {
-            console.error('Cool thumbnail batch error:', error);
-            validPlaces.forEach(place => {
-                const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);
-                if (img) img.src = 'data/needable/NewFrontPageGuy.png';
-            });
-        }
+        try {const thumbnails = await getBatchThumbnailUrls(placeIds, 512);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';}});
+        } catch (error) {console.error('Cool thumbnail batch error:', error);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
     }
 }
-//
+// --------------------------------------------------------------------------------
 
-let editMode = false;
-function toggleEditMode() {editMode = !editMode;renderPlaces();play_sound(editMode ? "click.mp3" : "splat.mp3");}
 
+let editMode=false;function toggleEditMode() {editMode = !editMode;renderPlaces();play_sound(editMode ? "click.mp3" : "splat.mp3");}
+
+let currentPage=0;const itemsPerPage=15;
 function renderPlaces() {
-    const container = document.getElementById('placesContainer');
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-    const selectedCategory = document.getElementById('categoryFilter').value;
-    if (savedPlaces.length === 0) {
-        container.innerHTML = `
+    const container = document.getElementById('placesContainer');const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const selectedCategory = document.getElementById('categoryFilter').value;
+    if (savedPlaces.length === 0) {container.innerHTML = `
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
-        `;
-        return;
+        `;return;
     }
-    let filteredPlaces = savedPlaces;
-    if (selectedCategory !== 'All') {
-        filteredPlaces = savedPlaces.filter(place => {
-            if (selectedCategory === 'None') {return !place.category || place.category === '';}
-            return place.category === selectedCategory;
-        });
-    }
+    let filteredPlaces=savedPlaces;if (selectedCategory !== 'All') {filteredPlaces=savedPlaces.filter(place => {if (selectedCategory === 'None') {return !place.category || place.category === '';}return place.category === selectedCategory;});}
     const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage);
     if (currentPage >= totalPages && totalPages > 0) {currentPage = totalPages - 1;}
-
-    const startIndex = currentPage * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);
-    const placesToShow = filteredPlaces.slice(startIndex, endIndex);
+    const startIndex = currentPage * itemsPerPage;const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);const placesToShow = filteredPlaces.slice(startIndex, endIndex);
     container.innerHTML = '';
     placesToShow.forEach((place, index) => {
-        const globalIndex = startIndex + index;
-        const displayCategory = place.category ? place.category : 'None';
+        const globalIndex = startIndex + index;const displayCategory = place.category ? place.category : 'None';
         container.innerHTML += `
         <div class="place" data-id="${globalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
@@ -316,78 +183,17 @@ function renderPlaces() {
             <desc><b>Added:</b> ${place.date}</desc>
         </div>
         `;
-    });
-    renderPagination(totalPages);
-    loadThumbnails(placesToShow, startIndex);
+    });renderPagination(totalPages);loadThumbnails(placesToShow, startIndex);
 }
 
 
 
-function loadDefaultList() {
-    fetch('My_Fav_List.json')
-        .then(response => {if (!response.ok) throw new Error('File not found');return response.json();})
-        .then(importedPlaces => {
-            if (!Array.isArray(importedPlaces)) {alert("Error: Invalid data format");return;}
-            
-            const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-            let duplicates = 0;
-            let imported = 0;
-            let invalid = 0;
-            
-            importedPlaces.forEach(place => {
-                if (!place.url || !place.name) {invalid++;return;}
-                const id = place.id || extractPlaceId(place.url);
-                const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
-                
-                const isDuplicate = savedPlaces.some(savedPlace => {
-                    return (id && savedPlace.id === id) || 
-                           savedPlace.normalizedUrl === normalizedUrl ||
-                           normalizeRobloxUrl(savedPlace.url) === normalizedUrl;
-                });
-                
-                if (isDuplicate) {duplicates++;
-                } else {
-                    const completePlace = {
-                        id,
-                        name: place.name,
-                        url: place.url,
-                        category: place.category || '',
-                        normalizedUrl,
-                        date: place.date || new Date().toLocaleString('en-GB', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }).replace(',', '')
-                    };
-                    savedPlaces.push(completePlace);
-                    imported++;
-                }
-            });
-            
-            localStorage.setItem('places', JSON.stringify(savedPlaces));
-            renderPlaces();
-            nextCoolSet();
-            alert(`Successfully imported: ${imported}\nDuplicates skipped: ${duplicates}\nInvalid entries: ${invalid}`);
-            play_sound("victory.mp3");
-        })
-        .catch(error => {
-            alert(`Error loading default list: ${error.message}\nMake sure Fav-List.json is in the same directory`);
-            console.error("Load error:", error);
-            play_sound("ouch.mp3");
-        });
-}
 
 
 
 function renderPagination(totalPages) {
     const container = document.getElementById('paginationContainer');
-    if (totalPages <= 1) {
-        container.innerHTML = '';
-        return;
-    }
-    
+    if (totalPages <= 1) {container.innerHTML = '';return;}
     let paginationHTML = '<div class="pagination">';
     paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>&lt; Back</button>`;
     paginationHTML += `<span>Page ${currentPage + 1} of ${totalPages}</span>`;
@@ -396,11 +202,7 @@ function renderPagination(totalPages) {
     container.innerHTML = paginationHTML;
 }
 
-function changePage(newPage) {
-    currentPage = newPage;
-    renderPlaces();
-    play_sound("pageturn.mp3");
-}
+function changePage(newPage) {currentPage = newPage;renderPlaces();play_sound("pageturn.mp3");}
 
 function clearAllPlaces() {
     if (confirm("Are you sure you want to delete ALL saved places? This action cannot be undone!")) {
@@ -693,10 +495,36 @@ function saveEditedPlace(index) {
     localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("splat.mp3");
 }
 
-function clearForm() {
-    document.getElementById('placeName').value = '';
-    document.getElementById('placeUrl').value = '';
-    document.getElementById('placeCategory').value = 'None';
+function clearForm() {document.getElementById('placeName').value = '';document.getElementById('placeUrl').value = '';document.getElementById('placeCategory').value = 'None';}
+
+
+
+
+
+
+
+function loadDefaultList() {
+    fetch('My_Fav_List.json')
+        .then(response => {if (!response.ok) throw new Error('File not found');return response.json();})
+        .then(importedPlaces => {if (!Array.isArray(importedPlaces)) {alert("Error: Invalid data format");return;}
+            const savedPlaces=JSON.parse(localStorage.getItem('places')) || [];let duplicates=0;let imported=0;let invalid=0;
+            importedPlaces.forEach(place => {
+                if (!place.url || !place.name) {invalid++;return;}
+                const id = place.id || extractPlaceId(place.url);const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
+                const isDuplicate = savedPlaces.some(savedPlace => {
+                    return (id && savedPlace.id === id) || 
+                           savedPlace.normalizedUrl === normalizedUrl ||
+                           normalizeRobloxUrl(savedPlace.url) === normalizedUrl;
+                });
+                if (isDuplicate) {duplicates++;
+                } else {
+                    const completePlace = {id,name:place.name,url:place.url,category:place.category || '',normalizedUrl,
+                        date:place.date || new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')
+                    };savedPlaces.push(completePlace);imported++;
+                }
+            });localStorage.setItem('places', JSON.stringify(savedPlaces));
+            renderPlaces();nextCoolSet();alert(`Successfully imported: ${imported}\nDuplicates skipped: ${duplicates}\nInvalid entries: ${invalid}`);play_sound("victory.mp3");
+        }).catch(error => {alert(`Error loading default list: ${error.message}\nMake sure Fav-List.json is in the same directory`);console.error("Load error:", error);play_sound("ouch.mp3");});
 }
 
 window.onload = function() {
