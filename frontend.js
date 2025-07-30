@@ -196,7 +196,8 @@ async function fetchViaImageTags(placeIds, size = 256) {
 
             const urlsToTry = [
                 `https://www.roblox.com/asset-thumbnail/image?assetId=${placeId}&width=${size}&height=${size}&format=png`,
-                `https://tr.rbxcdn.com/${placeId}/352/352/Image/Png`
+                `https://tr.rbxcdn.com/${placeId}/352/352/Image/Png`,
+                `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${placeId.join(',')}&size=${size}x${size}&format=Png&isCircular=false`
             ];
             
             let currentUrlIndex = 0;
@@ -253,6 +254,7 @@ async function fetchThumbnailsBatch(placeIds, size = 256) {
     const uniqueIds = [...new Set(placeIds.filter(id => id && id.length >= 7))];
     if (uniqueIds.length === 0) return new Map();
 
+    // 1. Пробуем прямое API-обращение
     try {
         const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uniqueIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
         const response = await fetch(apiUrl, {
@@ -274,13 +276,46 @@ async function fetchThumbnailsBatch(placeIds, size = 256) {
             }
         }
     } catch (e) {
-        console.log("Standard API request failed, trying alternative methods...");
+        console.log("Direct API failed, trying alternatives...");
     }
 
-    return fetchViaImageTags(uniqueIds, size);
+    // 2. Альтернативный метод через Image
+    const results = new Map();
+    await Promise.all(uniqueIds.map(async id => {
+        const url = await loadImageAlternative(id, size);
+        if (url) results.set(id, url);
+    }));
+    
+    return results;
 }
 
-
+function loadImageAlternative(placeId, size) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        
+        const urlsToTry = [
+            `https://www.roblox.com/asset-thumbnail/image?assetId=${placeId}&width=${size}&height=${size}&format=png`,
+            `https://tr.rbxcdn.com/${placeId}/${size}/${size}/Image/Png`
+        ];
+        
+        let currentTry = 0;
+        
+        const tryNext = () => {
+            if (currentTry >= urlsToTry.length) {
+                resolve(null);
+                return;
+            }
+            
+            img.src = urlsToTry[currentTry++];
+        };
+        
+        img.onload = () => resolve(img.src);
+        img.onerror = tryNext;
+        
+        tryNext();
+    });
+}
 
 async function getThumbnailsUrls(placeIds, size = 256) {
     const results = new Map();
@@ -304,12 +339,10 @@ async function getThumbnailsUrls(placeIds, size = 256) {
         try {
             const batchResults = await fetchThumbnailsBatch(toFetch, size);
             
-            // Обновляем кэш
             batchResults.forEach((url, id) => {
                 if (url) {
                     results.set(id, url);
-                    const cacheKey = `${id}_${size}`;
-                    thumbnailCache.set(cacheKey, {
+                    thumbnailCache.set(`${id}_${size}`, {
                         url: url,
                         timestamp: Date.now()
                     });
@@ -318,7 +351,7 @@ async function getThumbnailsUrls(placeIds, size = 256) {
             
             saveCache();
         } catch (error) {
-            console.error("Thumbnail batch fetch failed:", error);
+            console.error("Fetch failed:", error);
         }
     }
     
@@ -338,8 +371,8 @@ async function loadThumbnails(placesToShow, startIndex) {
         const img = document.getElementById(`img-${globalIndex}`);
         if (!img) return;
         
-        img.src = 'data/needable/loading.png';
         img.loading = 'eager';
+        img.src = 'data/needable/loading.png';
         
         if (place.id && place.id.length >= 7) {
             placeIds.push(place.id);
@@ -356,17 +389,13 @@ async function loadThumbnails(placesToShow, startIndex) {
         
         imageElements.forEach(({img, placeId}) => {
             const url = thumbnails.get(placeId);
-            if (url) {
-                img.src = url;
-                img.onerror = () => {
-                    img.src = 'data/needable/NewFrontPageGuy.png';
-                };
-            } else {
+            img.src = url || 'data/needable/NewFrontPageGuy.png';
+            img.onerror = () => {
                 img.src = 'data/needable/NewFrontPageGuy.png';
-            }
+            };
         });
     } catch (error) {
-        console.error("Thumbnail loading error:", error);
+        console.error("Loading error:", error);
         imageElements.forEach(({img}) => {
             img.src = 'data/needable/NewFrontPageGuy.png';
         });
