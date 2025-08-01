@@ -2,7 +2,7 @@
 @font-face {font-family:"Comic-Sans-MS";src:url("data/needable/Comic-Sans-MS.ttf")format("truetype")}
 @font-face {font-family:"geo_1";src:url("data/needable/microsoftsansserif.ttf")format("truetype")}
 body {max-width:900px;margin:0 auto;padding:20px;font-family:Comic-Sans-MS;
-
+ image-rendering: pixelated;
   background-size:100%;
 }
 
@@ -16,9 +16,10 @@ a{text-decoration:none;color:#2900ff;}
 
 .upload{border:1px solid #010101;width:150px;height:150px;font-size:11px;background-color:#eeeeee;margin-top:10px;}
 .center{text-align:center;}
-.center div{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;} .center a{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;}
+.center div{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;border-top:none;} .center a{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;border-bottom:none;}
 .upload .css{padding:0px 5px 0px;}
-.upload .t{font-family:Arial;border-bottom:1px solid #010101;background-color:#cccccc;width:100%;height:20px;letter-spacing:2px;text-align:center;}
+.upload .t{border-bottom:1px solid #010101;background-color:#cccccc;width:100%;height:20px;text-align:center;}
+.upload tt{font-family:Arial;letter-spacing:2px;}
 .upload img{margin-top:90px;}
 
 .block{background-color:#eeeeee;border:1px solid #010101;width:750px;height:530px;font-size:12px;margin-top:10px;color:#333333;} /*height:475px;*/
@@ -54,7 +55,7 @@ a{text-decoration:none;color:#2900ff;}
 input{background-color:#ffffff;width:100%;max-width:500px;max-height:20px;box-sizing:border-box;font-size:10px;border:none;border:2px solid #777777;outline:none;border-style:dashed;}
 input:focus{border-radius:5px;border:2px solid #101010;}
 
-select{font-family:'geo_1';max-height:15px;max-width:95px;font-size:10px;border:2px solid #777777;}
+select{font-family:'geo_1';max-height:15px;max-width:95px;font-size:10px;border:2px solid #777777;border-style:dashed;}
 select:focus{background-color:#6e99c9;color:white;}
 
 button{border:none;border:1px solid #777777;margin-top:5px;background:#ffffff;color:#777777;font-size:10px;min-width:40px;min-height:20px;}
