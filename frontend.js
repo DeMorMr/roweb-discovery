@@ -114,13 +114,13 @@ async function getThumbnailUrl(placeId, size = 256) {
 
 // Thumbnails --------------------------------------------------------------------------------
 const thumbnailCache = new Map();const BATCH_SIZE = 10;
-async function getBatchThumbnailUrls(placeIds, size = 256) {
+async function getBatchThumbnailUrls(placeIds, size = 128) { // 256
     const uncachedIds = [];const result = {};placeIds.forEach(id => {const cacheKey = `${id}_${size}`;if (thumbnailCache.has(cacheKey)) {result[id] = thumbnailCache.get(cacheKey);} else {uncachedIds.push(id);}});
     if (uncachedIds.length === 0) return result;
     const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
     for (const proxy of PROXY_SERVERS) {
         try {
-            const response = await fetch(proxy + encodeURIComponent(apiUrl));if (!response.ok) continue;const data = await response.json();
+            const response = await fetch(proxy + encodeURIComponent(apiUrl),{headers: {'Accept': 'image/webp'}});if (!response.ok) continue;const data = await response.json();
             if (data.data && Array.isArray(data.data)) {data.data.forEach(item => {if (item.imageUrl) {const cacheKey = `${item.targetId}_${size}`;thumbnailCache.set(cacheKey, item.imageUrl);result[item.targetId] = item.imageUrl;}});return result;}
         } catch (e) {console.error(`Proxy error (${proxy}):`, e);}
     }uncachedIds.forEach(id => {const cacheKey=`${id}_${size}`;thumbnailCache.set(cacheKey, null);result[id] = null;});return result;
