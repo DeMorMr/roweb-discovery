@@ -2,10 +2,10 @@
 @font-face {font-family:"Comic-Sans-MS";src:url("data/needable/Comic-Sans-MS.ttf")format("truetype")}
 @font-face {font-family:"geo_1";src:url("data/needable/microsoftsansserif.ttf")format("truetype")}
 body {max-width:900px;margin:0 auto;padding:20px;font-family:Comic-Sans-MS;
-  background-image: url("");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100%;
+  background-image: url("data/needable/backgrounds/RobloxScreenShot20230930_102558741.png");
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:100%;
 }
 
 header {border:1px solid #010101;text-align:center;width:900px;height:70px;} header img{margin-top:5px;}
@@ -18,6 +18,7 @@ a{text-decoration:none;color:#2900ff;}
 
 .upload{border:1px solid #010101;width:150px;height:150px;font-size:11px;background-color:#eeeeee;margin-top:10px;}
 .center{text-align:center;}
+.center div{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;} .center a{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;}
 .upload .css{padding:0px 5px 0px;}
 .upload .t{font-family:Arial;border-bottom:1px solid #010101;background-color:#cccccc;width:100%;height:20px;letter-spacing:2px;text-align:center;}
 .upload img{margin-top:90px;}
