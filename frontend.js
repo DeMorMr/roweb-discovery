@@ -128,10 +128,10 @@ async function getBatchThumbnailUrls(placeIds, size = 256) {
 async function loadThumbnails(placesToShow, startIndex) {
     for (let i = 0; i < placesToShow.length; i += BATCH_SIZE) {
         const batch = placesToShow.slice(i, i + BATCH_SIZE);const placeIds = batch.map(place => place.id).filter(id => id && id.length >= 7);
-        batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/loading.webp';});
+        batch.forEach((place, localIndex) => {const img = document.getElementById(`img-${place.originalIndex}`);if (img) img.src = 'data/needable/loading.webp';});
         if (placeIds.length === 0) continue;
-        try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';});
-        } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
+        try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place) => {const img = document.getElementById(`img-${place.originalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';});
+        } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place) => {const img=document.getElementById(`img-${place.originalIndex}`);if (img) img.src='data/needable/NewFrontPageGuy.png';});}
     }
 }
 async function loadCoolThumbnails(places) {
@@ -150,32 +150,33 @@ let editMode=false;function toggleEditMode() {editMode = !editMode;renderPlaces(
 
 let currentPage=0;const itemsPerPage=15;
 function renderPlaces() {
-    const container = document.getElementById('placesContainer');const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const selectedCategory = document.getElementById('categoryFilter').value;
+    const container = document.getElementById('placesContainer');if (!container) {console.error('placesContainer not found!');return;}
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const selectedCategory = document.getElementById('categoryFilter').value;
     if (savedPlaces.length === 0) {container.innerHTML = `
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
-        `;return;
-    }
-    let filteredPlaces=savedPlaces;if (selectedCategory !== 'All') {filteredPlaces=savedPlaces.filter(place => {if (selectedCategory === 'None') {return !place.category || place.category === '';}return place.category === selectedCategory;});}
+        `;return;}
+    const filteredPlaces = savedPlaces.map((place, originalIndex) => ({...place, originalIndex})).filter(place => {if (selectedCategory === 'All') return true;
+            if (selectedCategory === 'None') return !place.category || place.category === '';return place.category === selectedCategory;});
     const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage);
-    if (currentPage >= totalPages && totalPages > 0) {currentPage = totalPages - 1;}
-    const startIndex = currentPage * itemsPerPage;const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);const placesToShow = filteredPlaces.slice(startIndex, endIndex);
+    if (currentPage >= totalPages && totalPages > 0) {currentPage = totalPages - 1;}const startIndex = currentPage * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);const placesToShow = filteredPlaces.slice(startIndex, endIndex);
     container.innerHTML = '';
     placesToShow.forEach((place, index) => {
         const globalIndex = startIndex + index;const displayCategory = place.category ? place.category : 'None';
         container.innerHTML += `
-        <div class="place" data-id="${globalIndex}">
+        <div class="place" data-id="${place.originalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
-                <img id="img-${globalIndex}" src="data/needable/loading.webp" alt="${place.name}" decoding="async">
+                <img id="img-${place.originalIndex}" src="data/needable/loading.webp" alt="${place.name}" decoding="async">
                 ${editMode ? '' : `<br><t><small>${place.name}</small></t><br>`}
             </a>
             ${editMode ? `
                 <div class="edit-controls">
-                    <button onclick="deletePlace(${globalIndex})" class="delete-btn">✖</button>
-                    <button onclick="startEditPlace(${globalIndex})" class="edit-btn">✎</button>
+                    <button onclick="deletePlace(${place.originalIndex})" class="delete-btn">✖</button>
+                    <button onclick="startEditPlace(${place.originalIndex})" class="edit-btn">✎</button>
                 </div>
             ` : ''}
             <desc><b>Added:</b> ${place.date}</desc>
@@ -190,7 +191,9 @@ function renderPagination(totalPages) {
     if (totalPages <= 1) {container.innerHTML = '';return;}
     let paginationHTML = '<div class="pagination">';
     paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>&lt; Back</button>`;
-    paginationHTML += `<span>Page ${currentPage + 1} of ${totalPages}</span>`;
+    const startPage = Math.max(0, currentPage - 2);
+    const endPage = Math.min(totalPages - 1, currentPage + 2);
+    for (let i = startPage; i <= endPage; i++) {paginationHTML += `<button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i + 1}</button>`;}
     paginationHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>Next &gt;</button>`;
     paginationHTML += '</div>';
     container.innerHTML = paginationHTML;
@@ -198,12 +201,7 @@ function renderPagination(totalPages) {
 
 function changePage(newPage) {currentPage = newPage;renderPlaces();play_sound("pageturn.mp3");}
 
-function clearAllPlaces() {
-    if (confirm("Are you sure you want to delete ALL saved places? This action cannot be undone!")) {
-        localStorage.removeItem('places');localStorage.removeItem('categories');
-        clearThumbnailCache();renderPlaces();play_sound("collide.mp3");
-    }
-}
+function clearAllPlaces() {if (confirm("Are you sure you want to delete ALL saved places? This action cannot be undone!")) {localStorage.removeItem('places');localStorage.removeItem('categories');clearThumbnailCache();renderPlaces();play_sound("collide.mp3");}}
 
 function setRandomBanner() {
     const defaultBanners = [
@@ -230,7 +228,7 @@ function setRandomBackground() {
         "data/needable/backgrounds/p8wXp8.jpg",
         "data/needable/backgrounds/OIP%20(3).webp",
         "data/needable/backgrounds/OIP%20(2).webp",
-        "data/needable/backgrounds/Mod_525859_sd_image.jpg",
+        "data/needable/backgrounds/Mod_525859_sd_image.webp",
     ];
     try {
         const customBanners = JSON.parse(localStorage.getItem('customBackgrounds')) || [];const banners = customBanners.length > 0 ? customBanners : defaultBanners;
@@ -257,10 +255,7 @@ function updateCoolPlaces() {
         container.innerHTML += `
             <div class='UserPlace'>
                 <a onclick="play_sound('splat.mp3')" href='${place.url}' target='_blank'>
-                    <img src='data/needable/loading.webp' 
-                         data-place-id="${place.id}" 
-                         alt="${place.name}">
-                    <br>
+                    <img src='data/needable/loading.webp' data-place-id="${place.id}"alt="${place.name}"><br>
                 </a>
             </div>
         `;
@@ -284,8 +279,7 @@ function updateCoolNavigation() {const prevBtn = document.getElementById('prevCo
 
 
 function handleFileSelect(event) {
-    const file=event.target.files[0];if (!file) return;
-    const reader = new FileReader();
+    const file=event.target.files[0];if (!file) return;const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const importedPlaces = JSON.parse(e.target.result);
@@ -307,15 +301,11 @@ function handleFileSelect(event) {
             const completePlace = {
                 id,name:place.name,url:place.url,category,normalizedUrl,
                 date: place.date || new Date().toLocaleString('en-GB', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')
-            };
-            savedPlaces.push(completePlace);
-            imported++;
+            };savedPlaces.push(completePlace);imported++;
         }
     });
-    localStorage.setItem('places', JSON.stringify(savedPlaces));
-    currentPage = Math.floor(savedPlaces.length / itemsPerPage);
-    renderPlaces();
-    alert(`Succes import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
+    localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
+    renderPlaces();alert(`Succes import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
     } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck format file`);}
     };reader.readAsText(file);play_sound("victory.mp3");
 }
@@ -351,8 +341,7 @@ function loadRandomTrack() {
     const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();
 }
 function togglePlay() {
-    if (!audioPlayer.src) {loadRandomTrack();}
-    if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";
+    if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";
     } else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});
     }isPlaying = !isPlaying;play_sound("click.mp3");
 }
@@ -369,15 +358,11 @@ function deletePlace(index) {
     savedPlaces.splice(index, 1);localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("collide.mp3");
 }
 function startEditPlace(index) {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const place = savedPlaces[index];const placeElement = document.querySelector(`.place[data-id="${index}"]`);
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const place = savedPlaces[index];
+    const placeElement = document.querySelector(`.place[data-id="${index}"]`);
+    if (!placeElement) {console.error(`Place element with id ${index} not found!`);return;}
     let categoryOptions = '';
-    categories.forEach(cat => {
-        if (cat === 'All') return;
-        const selected = (cat === 'None' && !place.category) || 
-                         (cat === place.category);
-        
-        categoryOptions += `<option value="${cat}" ${selected ? 'selected' : ''}>${cat}</option>`;
-    });
+    categories.forEach(cat => {if (cat === 'All') return;const selected = (cat === 'None' && !place.category) || (cat === place.category);categoryOptions += `<option value="${cat}" ${selected ? 'selected' : ''}>${cat}</option>`;});
     placeElement.innerHTML = `
         <div class="edit-form">
             <input type="text" id="edit-name-${index}" value="${place.name}" placeholder="Place Name">
@@ -391,11 +376,15 @@ function startEditPlace(index) {
     `;play_sound("bass.mp3");
 }
 function saveEditedPlace(index) {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const place = savedPlaces[index];
-    const newName = document.getElementById(`edit-name-${index}`).value;const newUrl = document.getElementById(`edit-url-${index}`).value;const newCategory = document.getElementById(`edit-category-${index}`).value;
-    if (!newName || !newUrl) {alert("Both fields are required!");return;}
-    const storeCategory = newCategory === 'None' ? '' : newCategory;
-    place.name = newName;place.url = newUrl;place.category = storeCategory;place.id = extractPlaceId(newUrl) || place.id;place.normalizedUrl = normalizeRobloxUrl(newUrl);
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const nameInput = document.getElementById(`edit-name-${index}`);
+    const urlInput = document.getElementById(`edit-url-${index}`);const categorySelect = document.getElementById(`edit-category-${index}`);
+    if (!nameInput || !urlInput || !categorySelect) {console.error('Edit form inputs not found!');return;}
+    const newName = nameInput.value;const newUrl = urlInput.value;const newCategory = categorySelect.value;
+    if (!newName || !newUrl) {alert("Both fields are required!");return;}const place = savedPlaces[index];
+    if (!place) {console.error(`Place with index ${index} not found!`);return;}const storeCategory = newCategory === 'None' ? '' : newCategory;
+    place.name=newName;place.url=newUrl;
+    place.category=storeCategory;place.id=extractPlaceId(newUrl) || place.id;
+    place.normalizedUrl=normalizeRobloxUrl(newUrl);
     localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("splat.mp3");
 }
 // --------------------------------------------------------------------------------
