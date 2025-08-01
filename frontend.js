@@ -307,7 +307,7 @@ function handleFileSelect(event) {
     localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
     renderPlaces();alert(`Succes import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
     } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck format file`);}
-    };reader.readAsText(file);play_sound("victory.mp3");
+    };reader.readAsText(file);play_sound("victory.mp3");startConfetti()
 }
 
 // MUSIC PLAYER --------------------------------------------------------------------------------
@@ -415,6 +415,58 @@ function loadDefaultList() {
             renderPlaces();nextCoolSet();alert(`Successfully imported: ${imported}\nDuplicates skipped: ${duplicates}\nInvalid entries: ${invalid}`);play_sound("victory.mp3");
         }).catch(error => {alert(`Error loading default list: ${error.message}\nMake sure Fav-List.json is in the same directory`);console.error("Load error:", error);play_sound("ouch.mp3");});
 }
+
+
+function startConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;canvas.height = window.innerHeight;
+    const particles = [];
+    const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+    for (let i = 0; i < 150; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            size: Math.random() * 8 + 3,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            speedY: Math.random() * 3 + 2,
+            speedX: Math.random() * 4 - 2,
+            rotation: Math.random() * 360,
+            rotationSpeed: Math.random() * 5 - 2.5
+        });
+    }
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+            p.y += p.speedY;
+            p.x += p.speedX;
+            p.rotation += p.rotationSpeed;
+            if (p.y > canvas.height) {p.y = -10;p.x = Math.random() * canvas.width;}
+        }
+        requestAnimationFrame(animate);
+    }animate();setTimeout(() => {canvas.remove();}, 2500);
+}
+
+
+
+
+
+
 
 window.onload = function() {
     setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();loadRandomTrack();
