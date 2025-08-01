@@ -2,9 +2,7 @@
 @font-face {font-family:"Comic-Sans-MS";src:url("data/needable/Comic-Sans-MS.ttf")format("truetype")}
 @font-face {font-family:"geo_1";src:url("data/needable/microsoftsansserif.ttf")format("truetype")}
 body {max-width:900px;margin:0 auto;padding:20px;font-family:Comic-Sans-MS;
-  background-image: url("data/needable/backgrounds/RobloxScreenShot20230930_102558741.png");
-  background-position:center;
-  background-repeat:no-repeat;
+
   background-size:100%;
 }
 

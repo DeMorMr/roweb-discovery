@@ -226,6 +226,28 @@ function setRandomBanner() {
     } catch (error) {console.error('Error setting banner:', error);const header = document.querySelector('.banner');if (header) {header.style.backgroundImage = "url('data/needable/NewFrontPageGuy.png')";}}
 }
 
+function setRandomBackground() {
+    const defaultBanners = [
+        "data/needable/backgrounds/RobloxScreenShot20230930_102558741.png",
+        "data/needable/backgrounds/p8wXp8.png",
+        "data/needable/backgrounds/OIP%20(4).webp",
+        "data/needable/backgrounds/OIP%20(3).webp",
+        "data/needable/backgrounds/OIP%20(2).webp",
+        "data/needable/backgrounds/OIP%20(1).webp",
+        "data/needable/backgrounds/Mod_525859_sd_image.jpg",
+    ];
+    try {
+        const customBanners = JSON.parse(localStorage.getItem('customBackgrounds')) || [];const banners = customBanners.length > 0 ? customBanners : defaultBanners;
+        const randomBanner = banners[Math.floor(Math.random() * banners.length)];const header = document.querySelector('body');
+        if (header) {
+            header.style.backgroundImage = `url('${randomBanner}')`;
+            header.style.backgroundSize = 'cover';
+            header.style.backgroundPosition = 'center';
+            header.style.backgroundRepeat = 'no-repeat';
+            header.style.transition = 'background-image 0.5s ease-in-out';
+        }
+    } catch (error) {console.error('Error setting background:', error);const header = document.querySelector('body');if (header) {header.style.backgroundImage = "url('data/needable/NewFrontPageGuy.png')";}}
+}
 
 // USERPLACES --------------------------------------------------------------------------------
 let coolPlacesHistory = [];
@@ -410,7 +432,7 @@ function loadDefaultList() {
 }
 
 window.onload = function() {
-    initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
+    setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
