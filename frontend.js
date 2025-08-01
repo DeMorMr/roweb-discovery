@@ -48,9 +48,7 @@ function populateCategoryDropdowns() {
     [categorySelect, filterSelect].forEach(select => {
         select.innerHTML = '';
         categories.forEach(category => {
-            if (select === categorySelect && category === 'All') return;
-            const option = document.createElement('option');
-            option.value = category;option.textContent = category;select.appendChild(option);
+            if (select === categorySelect && category === 'All') return;const option = document.createElement('option');option.value = category;option.textContent = category;select.appendChild(option);
         });});categorySelect.value = 'None';filterSelect.value = 'All';
 }
 // --------------------------------------------------------------------------------
@@ -130,7 +128,7 @@ async function getBatchThumbnailUrls(placeIds, size = 256) {
 async function loadThumbnails(placesToShow, startIndex) {
     for (let i = 0; i < placesToShow.length; i += BATCH_SIZE) {
         const batch = placesToShow.slice(i, i + BATCH_SIZE);const placeIds = batch.map(place => place.id).filter(id => id && id.length >= 7);
-        batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/loading.png';});
+        batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/loading.webp';});
         if (placeIds.length === 0) continue;
         try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';});
         } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place, localIndex) => {const globalIndex = startIndex + i + localIndex;const img = document.getElementById(`img-${globalIndex}`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
@@ -139,7 +137,7 @@ async function loadThumbnails(placesToShow, startIndex) {
 async function loadCoolThumbnails(places) {
     for (let i = 0; i < places.length; i += BATCH_SIZE) {
         const batch = places.slice(i, i + BATCH_SIZE);const validPlaces = batch.filter(place => place.id && place.id.length >= 7);const placeIds = validPlaces.map(place => place.id);
-        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.png';});
+        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.webp';});
         if (placeIds.length === 0) continue;
         try {const thumbnails = await getBatchThumbnailUrls(placeIds, 512);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';}});
         } catch (error) {console.error('Cool thumbnail batch error:', error);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
@@ -171,7 +169,7 @@ function renderPlaces() {
         container.innerHTML += `
         <div class="place" data-id="${globalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
-                <img id="img-${globalIndex}" src="data/needable/loading.png" alt="${place.name}" decoding="async">
+                <img id="img-${globalIndex}" src="data/needable/loading.webp" alt="${place.name}" decoding="async">
                 ${editMode ? '' : `<br><t><small>${place.name}</small></t><br>`}
             </a>
             ${editMode ? `
@@ -253,13 +251,13 @@ let currentCoolIndex = -1;
 function updateCoolPlaces() {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const container = document.querySelector('.UserPlaces');
     container.innerHTML = '';
-    if (savedPlaces.length === 0) {for (let i = 0; i < 5; i++) {container.innerHTML += `<div class='UserPlace'><a href=''><img src='data/needable/loading.png'><br></a></div>`;}return;}
+    if (savedPlaces.length === 0) {for (let i = 0; i < 5; i++) {container.innerHTML += `<div class='UserPlace'><a href=''><img src='data/needable/loading.webp'><br></a></div>`;}return;}
     const currentSet = coolPlacesHistory[currentCoolIndex] || [];
     currentSet.forEach(place => {
         container.innerHTML += `
             <div class='UserPlace'>
                 <a onclick="play_sound('splat.mp3')" href='${place.url}' target='_blank'>
-                    <img src='data/needable/loading.png' 
+                    <img src='data/needable/loading.webp' 
                          data-place-id="${place.id}" 
                          alt="${place.name}">
                     <br>
