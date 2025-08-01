@@ -55,7 +55,7 @@ a{text-decoration:none;color:#2900ff;}
 }
 
 
-
+ 
 
 .pagination {display:flex;justify-content:center;align-items:center;gap:10px;margin:0px 0;}
 .pagination button:disabled{opacity:0.5;cursor:not-allowed;}

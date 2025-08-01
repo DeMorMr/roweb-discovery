@@ -77,7 +77,7 @@ function downloadData() {
 
 
 
-
+ 
 /* BACKUP!!!
 async function getThumbnailUrl(placeId, size = 256) {
     const cacheKey = `${placeId}_${size}`;
