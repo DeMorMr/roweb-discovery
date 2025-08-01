@@ -228,12 +228,10 @@ function setRandomBanner() {
 
 function setRandomBackground() {
     const defaultBanners = [
-        "data/needable/backgrounds/RobloxScreenShot20230930_102558741.png",
-        "data/needable/backgrounds/p8wXp8.png",
-        "data/needable/backgrounds/OIP%20(4).webp",
+        "data/needable/backgrounds/RobloxScreenShot20230930_102558741.jpeg",
+        "data/needable/backgrounds/p8wXp8.jpg",
         "data/needable/backgrounds/OIP%20(3).webp",
         "data/needable/backgrounds/OIP%20(2).webp",
-        "data/needable/backgrounds/OIP%20(1).webp",
         "data/needable/backgrounds/Mod_525859_sd_image.jpg",
     ];
     try {
