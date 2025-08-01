@@ -1,20 +1,20 @@
 /* AUTHOR BY DeMorMr  | https://github.com/DeMorMr*/
-@font-face {font-family: "Comic-Sans-MS";src: url("data/needable/Comic-Sans-MS.ttf") format("truetype")}
-@font-face {font-family: "geo_1";src: url("data/needable/microsoftsansserif.ttf") format("truetype")}
-body {max-width: 900px;margin: 0 auto;padding: 20px;font-family:Comic-Sans-MS;
+@font-face {font-family:"Comic-Sans-MS";src:url("data/needable/Comic-Sans-MS.ttf")format("truetype")}
+@font-face {font-family:"geo_1";src:url("data/needable/microsoftsansserif.ttf")format("truetype")}
+body {max-width:900px;margin:0 auto;padding:20px;font-family:Comic-Sans-MS;
   background-image: url("");
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100%;
 }
-header {border: 1px solid #010101;text-align:center;width:900px;height:70px;}
-header img{margin-top:5px;}
-.banner{background-image: url('data/needable/loading.png');background-size: cover;background-position: center;background-repeat: no-repeat;transition: background-image 0.5s ease-in-out;}
+
+header {border:1px solid #010101;text-align:center;width:900px;height:70px;} header img{margin-top:5px;}
+.banner{background-image:url('data/needable/loading.png');background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.5s ease-in-out;}
 footer{font-family:Arial;font-size:10px;text-align:center;padding-top:10px;}
 container{display:flex;gap:10px;}
 a{text-decoration:none;color:#2900ff;}
 
-.unselectable {-webkit-touch-callout: none;-webkit-user-select: none;-khtml-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}
+.unselectable {-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;}
 
 .upload{border:1px solid #010101;width:150px;height:150px;font-size:11px;background-color:#eeeeee;margin-top:10px;}
 .center{text-align:center;}
@@ -33,7 +33,7 @@ a{text-decoration:none;color:#2900ff;}
 .place desc{font-size:9px;} /*10px*/
 
 .cool{
-  background-image:url("data/needable/every_old_roblox_assets_ever__2006_2014_esque_by_arodiguezb_dj5puy7.png");background-position: center;background-repeat: no-repeat;background-size: 100%;
+  background-image:url("data/needable/every_old_roblox_assets_ever__2006_2014_esque_by_arodiguezb_dj5puy7.png");background-position:center;background-repeat:no-repeat;background-size:100%;
   border:1px solid #010101;width:100%;height:90px;margin-top:10px;position:relative;} /*padding:5px;*/
 .cool .tb{font-size:12px;color:#333333;display:inline-block;padding:5px 10px 0px;} /*border:1px solid red;*/
 .cool .d{border-right:1px solid #010101;background-color:#bbbbbb;width:161px;height:100%;}
@@ -44,15 +44,7 @@ a{text-decoration:none;color:#2900ff;}
 .UserPlace{aspect-ratio:16/10;width:115px;display:inline-block;}
 .UserPlace img{aspect-ratio:16/10;width:115px;border:1px solid rgba(255, 255, 255, 0.5);}
 
-.empty-message {
-   font-family: "geo_1";
-    align-items:center;
-    padding: 50px;
-    font-size: 18px;
-    color: #666;
-    margin: 20px auto;
-    max-width: 500px;
-}
+.empty-message {font-family:"geo_1";align-items:center;padding:50px;font-size:18px;color:#666;margin:20px auto;max-width:500px;}
 
 
  
@@ -60,29 +52,29 @@ a{text-decoration:none;color:#2900ff;}
 .pagination {display:flex;justify-content:center;align-items:center;gap:10px;margin:0px 0;}
 .pagination button:disabled{opacity:0.5;cursor:not-allowed;}
 
-input{background-color:#ffffff;width: 100%;max-width:500px;max-height: 20px;box-sizing: border-box;font-size: 10px;border:none;border: 2px solid #777777;outline:none;border-style: dashed;}
+input{background-color:#ffffff;width:100%;max-width:500px;max-height:20px;box-sizing:border-box;font-size:10px;border:none;border:2px solid #777777;outline:none;border-style:dashed;}
 input:focus{border-radius:5px;border:2px solid #101010;}
 
-select{font-family:'geo_1';max-height:15px;max-width:95px;font-size:10px;border: 2px solid #777777;}
+select{font-family:'geo_1';max-height:15px;max-width:95px;font-size:10px;border:2px solid #777777;}
 select:focus{background-color:#6e99c9;color:white;}
 
-button{border:none;border: 1px solid #777777;margin-top:5px;background:#ffffff;color:#777777;font-size:10px;min-width:40px;min-height:20px;}
+button{border:none;border:1px solid #777777;margin-top:5px;background:#ffffff;color:#777777;font-size:10px;min-width:40px;min-height:20px;}
 button:hover{background:#6e99c9;color:#ffffff;text-decoration:underline;border:1px solid #000000;}
 
 .music-player{background-image:url('data/needable/banners/');background-size:cover;background-position:center;background-repeat:no-repeat;margin-top:10px;}
-.track-info {border: 1px solid #010101;height:5px;overflow: hidden;position:relative;background: rgba(0, 0, 0, 0.2);padding:10px;}
+.track-info {border:1px solid #010101;height:5px;overflow:hidden;position:relative;background:rgba(0,0,0,0.2);padding:10px;}
 .track-name {
   text-shadow:-1px 0 0 red,0 -1px 0 red,1px 0 0 red,0 1px 0 red; 
   font-size:20px;font-family:'geo_1';color:white;background-image:url('data/needable/banners/old-roblox-banners-v0-ioau0u85om7b1.webp');background-size:cover;background-position:center;background-repeat:no-repeat;position:absolute;white-space:nowrap;animation:moveText 15s linear infinite;margin-top:-8px;}
-.controls {display: flex;justify-content: space-between;}
+.controls {display:flex;justify-content:space-between;}
 .volume-container {display:flex;align-items:center;gap:10px;}
 .progress {height:4px;background:black;border:1px solid red;margin-top:5px;overflow:hidden;}
 .progress-bar {height:100%;width:0%;background:red;transition:width 0.1s;}
 
-.information {width:880px;height:10px;overflow:hidden;position:relative;background:#6e99c9;padding:10px;border: 1px solid #010101;border-top:none;margin-top:10px;}
+.information {width:880px;height:10px;overflow:hidden;position:relative;background:#6e99c9;padding:10px;border:1px solid #010101;border-top:none;margin-top:10px;}
 .information-text {position:absolute;white-space:nowrap;animation:moveText 15s linear infinite;margin-top:-7px;color:white;}
 .information-text:hover{text-decoration:underline;}
 .information a{color:white;}
-@keyframes moveText {0% { left: 100%; transform: translateX(0); }100% { left: 0; transform: translateX(-100%); }}
+@keyframes moveText{0%{left:100%;transform:translateX(0);}100%{left:0;transform:translateX(-100%);}}
 
 /* AUTHOR BY DeMorMr  | https://github.com/DeMorMr*/
