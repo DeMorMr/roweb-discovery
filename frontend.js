@@ -114,10 +114,9 @@ async function getThumbnailUrl(placeId, size = 256) {
 
 // Thumbnails --------------------------------------------------------------------------------
 const thumbnailCache = new Map();const BATCH_SIZE = 10;
-async function getBatchThumbnailUrls(placeIds, size = 256) { // 256
-    const uncachedIds = [];const result = {};placeIds.forEach(id => {const cacheKey = `${id}_${size}`;if (thumbnailCache.has(cacheKey)) {result[id] = thumbnailCache.get(cacheKey);} else {uncachedIds.push(id);}});
-    if (uncachedIds.length === 0) return result;
-    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=128x128&format=Png&isCircular=false`; //${size}x${size}&format=Png&isCircular=false
+async function getBatchThumbnailUrls(placeIds, size = 128) { // 256
+    const uncachedIds = [];const result = {};placeIds.forEach(id => {const cacheKey = `${id}_${size}`;if (thumbnailCache.has(cacheKey)) {result[id] = thumbnailCache.get(cacheKey);} else {uncachedIds.push(id);}});if (uncachedIds.length === 0) return result;
+    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`; //${size}x${size}&format=Png&isCircular=false
     for (const proxy of PROXY_SERVERS) {
         try {
             const response = await fetch(proxy + encodeURIComponent(apiUrl),{headers: {'Accept': 'image/webp'}});if (!response.ok) continue;const data = await response.json();
@@ -128,8 +127,7 @@ async function getBatchThumbnailUrls(placeIds, size = 256) { // 256
 async function loadThumbnails(placesToShow, startIndex) {
     for (let i = 0; i < placesToShow.length; i += BATCH_SIZE) {
         const batch = placesToShow.slice(i, i + BATCH_SIZE);const placeIds = batch.map(place => place.id).filter(id => id && id.length >= 7);
-        batch.forEach((place, localIndex) => {const img = document.getElementById(`img-${place.originalIndex}`);if (img) img.src = 'data/needable/loading.webp';});
-        if (placeIds.length === 0) continue;
+        batch.forEach((place, localIndex) => {const img = document.getElementById(`img-${place.originalIndex}`);if (img) img.src = 'data/needable/loading.webp';});if (placeIds.length === 0) continue;
         try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place) => {const img = document.getElementById(`img-${place.originalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';});
         } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place) => {const img=document.getElementById(`img-${place.originalIndex}`);if (img) img.src='data/needable/NewFrontPageGuy.png';});}
     }
@@ -137,8 +135,7 @@ async function loadThumbnails(placesToShow, startIndex) {
 async function loadCoolThumbnails(places) {
     for (let i = 0; i < places.length; i += BATCH_SIZE) {
         const batch = places.slice(i, i + BATCH_SIZE);const validPlaces = batch.filter(place => place.id && place.id.length >= 7);const placeIds = validPlaces.map(place => place.id);
-        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.webp';});
-        if (placeIds.length === 0) continue;
+        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.webp';});if (placeIds.length === 0) continue;
         try {const thumbnails = await getBatchThumbnailUrls(placeIds, 512);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';}});
         } catch (error) {console.error('Cool thumbnail batch error:', error);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
     }
