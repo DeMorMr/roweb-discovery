@@ -76,7 +76,7 @@ button:hover{background:#6e99c9;color:#ffffff;text-decoration:underline;border:1
 
 .information {width:880px;height:10px;overflow:hidden;position:relative;background:#6e99c9;padding:10px;border:1px solid #010101;border-top:none;margin-top:10px;}
 .information-text {position:absolute;white-space:nowrap;animation:moveText 15s linear infinite;margin-top:-7px;color:white;}
-.information-text:hover{text-decoration:underline;}
+.information-text a:hover{text-decoration:underline;}
 .information a{color:white;}
 @keyframes moveText{0%{left:100%;transform:translateX(0);}100%{left:0;transform:translateX(-100%);}}
 

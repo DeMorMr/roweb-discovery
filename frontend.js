@@ -75,9 +75,12 @@ function savePlace() {
     savedPlaces.push(place);localStorage.setItem('places', JSON.stringify(savedPlaces));play_sound("splat.mp3");renderPlaces();clearForm();
 }
 function downloadData() {
-    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const dataStr = JSON.stringify(savedPlaces, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});const url = URL.createObjectURL(blob);const a = document.createElement('a');a.href = url;a.download = 'saved.json';
-    document.body.appendChild(a);a.click();setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);play_sound("click.mp3");
+    const savedPlaces=JSON.parse(localStorage.getItem('places')) || [];const categories=JSON.parse(localStorage.getItem('categories')) || ['All', 'None'];
+    const exportData={version:1,categories:categories,places:savedPlaces};
+    const dataStr = JSON.stringify(exportData, null, 2);const blob = new Blob([dataStr], {type: 'application/json'});const url = URL.createObjectURL(blob);const a = document.createElement('a');
+    a.href=url;a.download='saved.json';
+    document.body.appendChild(a);a.click();
+    setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);play_sound("click.mp3");
 }
 // --------------------------------------------------------------------------------
 
@@ -161,7 +164,7 @@ function renderPlaces() {
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
-                <img src='data/needable/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3'])"alt="teddy"width="115px"><br>
+                <img src='data/needable/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3'])"alt="teddy"width="115px" title='Teddy Bloxpin'><br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
         `;return;}
@@ -176,7 +179,7 @@ function renderPlaces() {
         container.innerHTML += `
         <div class="place" data-id="${place.originalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
-                <img id="img-${place.originalIndex}" src="data/needable/loading.webp" alt="${place.name}" decoding="async">
+                <img id="img-${place.originalIndex}" src="data/needable/loading.webp" alt="${place.name}" title='${place.name}' decoding="async">
                 ${editMode ? '' : `<br><t><small>${place.name}</small></t><br>`}
             </a>
             ${editMode ? `
@@ -261,7 +264,7 @@ function updateCoolPlaces() {
         container.innerHTML += `
             <div class='UserPlace'>
                 <a onclick="play_sound('splat.mp3')" href='${place.url}' target='_blank'>
-                    <img src='data/needable/loading.webp' data-place-id="${place.id}"alt="${place.name}"><br>
+                    <img src='data/needable/loading.webp' data-place-id="${place.id}"alt="${place.name}" title='${place.name}'><br>
                 </a>
             </div>
         `;
@@ -285,35 +288,37 @@ function updateCoolNavigation() {const prevBtn = document.getElementById('prevCo
 
 
 function handleFileSelect(event) {
-    const file=event.target.files[0];if (!file) return;const reader = new FileReader();
+    const file = event.target.files[0];if (!file) return;const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const importedPlaces = JSON.parse(e.target.result);
-            if (!Array.isArray(importedPlaces)) {alert("Error: no data");return;}
-            const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
+            const importedData = JSON.parse(e.target.result);let importedPlaces = [];let importedCategories = null;
+            if (importedData.places && importedData.categories) {importedPlaces = importedData.places;importedCategories = importedData.categories;
+            } else if (Array.isArray(importedData)) {importedPlaces = importedData;
+            } else {throw new Error("Invalid file format");}
+            if (!Array.isArray(importedPlaces)) {alert("Error: no data");return;}const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
             let duplicates = 0;let imported = 0;
-    importedPlaces.forEach(place => {
-        if (!place.url || !place.name) {console.warn("Missed url or name:",place);return;}
-        const id = place.id || extractPlaceId(place.url);
-        const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
-        const isDuplicate = savedPlaces.some(savedPlace => {
-            return (id && savedPlace.id === id) || 
-                   savedPlace.normalizedUrl === normalizedUrl ||
-                   normalizeRobloxUrl(savedPlace.url) === normalizedUrl;
-        });
-        if (isDuplicate) {duplicates++;
-        } else {
-            let category = place.category || '';
-            const completePlace = {
-                id,name:place.name,url:place.url,category,normalizedUrl,
-                date: place.date || new Date().toLocaleString('en-GB', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')
-            };savedPlaces.push(completePlace);imported++;
-        }
-    });
-    localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
-    renderPlaces();alert(`Succes import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
-    } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck format file`);}
-    };reader.readAsText(file);play_sound("victory.mp3");startConfetti()
+            if (importedCategories && importedCategories.length > 0) {
+                const currentCategories = JSON.parse(localStorage.getItem('categories')) || ['All', 'None'];const newCategories = importedCategories.filter(cat => cat !== 'All' && cat !== 'None' && !currentCategories.includes(cat));
+                if (newCategories.length > 0) {categories = [...currentCategories, ...newCategories];localStorage.setItem('categories', JSON.stringify(categories));populateCategoryDropdowns();}
+            }
+            importedPlaces.forEach(place => {
+                if (!place.url || !place.name) {console.warn("Missed url or name:", place);return;}
+                const id = place.id || extractPlaceId(place.url);
+                const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
+                const isDuplicate = savedPlaces.some(savedPlace => {return (id && savedPlace.id === id) || savedPlace.normalizedUrl === normalizedUrl || normalizeRobloxUrl(savedPlace.url) === normalizedUrl;});
+                if (isDuplicate) {duplicates++;
+                } else {
+                    let category = place.category || '';
+                    const completePlace = {
+                        id,name:place.name,url:place.url,category,normalizedUrl,
+                        date:place.date || new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')
+                    };savedPlaces.push(completePlace);imported++;
+                }
+            });
+            localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
+            renderPlaces();alert(`Success import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
+        } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck file format`);}
+    };reader.readAsText(file);play_sound("victory.mp3");startConfetti();
 }
 
 // MUSIC PLAYER --------------------------------------------------------------------------------
@@ -334,7 +339,8 @@ const tracks = [
     "data/needable/Audio/11.%20Roblox%20Soundtrack%20-%20Clan%20Being%20Raided.mp3","data/needable/Audio/09.%20Roblox%20Soundtrack%20-%20Crossroads%20Times.mp3",
     "data/needable/Audio/08.%20Roblox%20Soundtrack%20-%20Noob%20Alert.mp3","data/needable/Audio/07.%20Roblox%20Soundtrack%20-%20Trouble%20Ahead%20(BONUS%20SONG)%20(Teddy9340's%20Production).mp3",
     "data/needable/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3","data/needable/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
-    "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3"
+    "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3",
+    "data/needable/Audio/its-raining-tacos!.mp3"
 ];
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
@@ -417,43 +423,15 @@ function loadDefaultList() {
 
 
 function startConfetti() {
-    const canvas = document.createElement('canvas');canvas.style.position = 'fixed';
-    canvas.style.top = '0';canvas.style.left = '0';
-    canvas.style.width = '100%';canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';canvas.style.zIndex = '9999';
-    document.body.appendChild(canvas);const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;canvas.height = window.innerHeight;
-    const particles = [];
+    const canvas = document.createElement('canvas');canvas.style.position = 'fixed';canvas.style.top = '0';canvas.style.left = '0';canvas.style.width = '100%';canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';canvas.style.zIndex = '9999';document.body.appendChild(canvas);const ctx = canvas.getContext('2d');canvas.width = window.innerWidth;canvas.height = window.innerHeight;const particles = [];
     const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
-    for (let i = 0; i < 150; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height - canvas.height,
-            size: Math.random() * 8 + 3,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            speedY: Math.random() * 3 + 2,
-            speedX: Math.random() * 4 - 2,
-            rotation: Math.random() * 360,
-            rotationSpeed: Math.random() * 5 - 2.5
-        });
-    }
+    for (let i = 0; i < 150; i++) {particles.push({x: Math.random() * canvas.width,y: Math.random() * canvas.height - canvas.height,size: Math.random() * 8 + 3,color: colors[Math.floor(Math.random() * colors.length)],speedY: Math.random() * 3 + 2,speedX: Math.random() * 4 - 2,rotation: Math.random() * 360,rotationSpeed: Math.random() * 5 - 2.5});}
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-            const p = particles[i];
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation * Math.PI / 180);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-            ctx.restore();
-            p.y += p.speedY;
-            p.x += p.speedX;
-            p.rotation += p.rotationSpeed;
-            if (p.y > canvas.height) {p.y = -10;p.x = Math.random() * canvas.width;}
-        }
-        requestAnimationFrame(animate);
-    }animate();setTimeout(() => {canvas.remove();}, 2500);
+        for (let i = 0; i < particles.length; i++) {const p = particles[i];ctx.save();ctx.translate(p.x, p.y);ctx.rotate(p.rotation * Math.PI / 180);ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);ctx.restore();p.y += p.speedY;p.x += p.speedX;p.rotation += p.rotationSpeed;if (p.y > canvas.height) {p.y = -10;p.x = Math.random() * canvas.width;}
+        }requestAnimationFrame(animate);}animate();setTimeout(() => {canvas.remove();}, 2500);
 }
 
 
