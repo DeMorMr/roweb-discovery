@@ -114,10 +114,10 @@ async function getThumbnailUrl(placeId, size = 256) {
 
 // Thumbnails --------------------------------------------------------------------------------
 const thumbnailCache = new Map();const BATCH_SIZE = 10;
-async function getBatchThumbnailUrls(placeIds, size = 128) { // 256
+async function getBatchThumbnailUrls(placeIds, size = 256) { // 256
     const uncachedIds = [];const result = {};placeIds.forEach(id => {const cacheKey = `${id}_${size}`;if (thumbnailCache.has(cacheKey)) {result[id] = thumbnailCache.get(cacheKey);} else {uncachedIds.push(id);}});
     if (uncachedIds.length === 0) return result;
-    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=${size}x${size}&format=Png&isCircular=false`;
+    const PROXY_SERVERS = ["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];const apiUrl = `https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${uncachedIds.join(',')}&size=128x128&format=Png&isCircular=false`; //${size}x${size}&format=Png&isCircular=false
     for (const proxy of PROXY_SERVERS) {
         try {
             const response = await fetch(proxy + encodeURIComponent(apiUrl),{headers: {'Accept': 'image/webp'}});if (!response.ok) continue;const data = await response.json();
@@ -336,15 +336,8 @@ const volumeSlider=document.getElementById('volume-slider');const trackName = do
 const progressBar=document.getElementById('progress-bar');const errorMsg = document.getElementById('error-message');
 let currentTrackIndex=0;let isPlaying=false;
 function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
-function loadRandomTrack() {
-    if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}currentTrackIndex = Math.floor(Math.random() * tracks.length);
-    const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();
-}
-function togglePlay() {
-    if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";
-    } else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});
-    }isPlaying = !isPlaying;play_sound("click.mp3");
-}
+function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}currentTrackIndex = Math.floor(Math.random() * tracks.length);const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();}
+function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;play_sound("click.mp3");}
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
 // --------------------------------------------------------------------------------
@@ -418,16 +411,11 @@ function loadDefaultList() {
 
 
 function startConfetti() {
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '9999';
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement('canvas');canvas.style.position = 'fixed';
+    canvas.style.top = '0';canvas.style.left = '0';
+    canvas.style.width = '100%';canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;canvas.height = window.innerHeight;
     const particles = [];
     const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
@@ -465,8 +453,8 @@ function startConfetti() {
 
 
 
-
-
+const randombackgroundinterval = setInterval(function() {setRandomBackground();},30000)
+const randombannerinterval = setInterval(function() {setRandomBanner();},60000)
 
 window.onload = function() {
     setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();loadRandomTrack();

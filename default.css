@@ -1,4 +1,6 @@
 /* AUTHOR BY DeMorMr  | https://github.com/DeMorMr*/
+*{cursor:url(data/needable/ArrowCursor.png) 50 40, url(data/needable/ArrowFarCursor.png) 50 40, default;}
+
 @font-face {font-family:"Comic-Sans-MS";font-display:swap;src:url("data/needable/Comic-Sans-MS.woff2")format("woff2")}
 @font-face {font-family:"geo_1";font-display:swap;src:url("data/needable/microsoftsansserif.woff2")format("woff2")}
 body {max-width:900px;margin:0 auto;padding:20px;
