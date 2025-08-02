@@ -1,5 +1,13 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
-function play_sound(name) {var audio = new Audio();audio.src = 'data/needable/sounds/' + name;audio.autoplay = true;return true;}
+//function play_sound(name) {var audio = new Audio();audio.src = 'data/needable/sounds/' + name;audio.autoplay = true;return true;}
+function play_sound(name) {
+    var audio = new Audio();
+    if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/needable/sounds/' + randomSound;} 
+    else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/needable/sounds/' + randomSound;}
+    else {audio.src = 'data/needable/sounds/' + name;}
+    audio.autoplay = true;
+    return true;
+}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;play_sound("click.mp3");}
 
@@ -153,6 +161,7 @@ function renderPlaces() {
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
+                <img src='data/needable/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3'])"alt="teddy"width="115px"><br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
         `;return;}

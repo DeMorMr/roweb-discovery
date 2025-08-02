@@ -4,6 +4,7 @@
 @font-face {font-family:"Comic-Sans-MS";font-display:swap;src:url("data/needable/Comic-Sans-MS.woff2")format("woff2")}
 @font-face {font-family:"geo_1";font-display:swap;src:url("data/needable/microsoftsansserif.woff2")format("woff2")}
 body {max-width:900px;margin:0 auto;padding:20px;
+ background-image:url('data/needable/loading.webp');
  font-family:Comic-Sans-MS, sans-serif;
  image-rendering:pixelated;background-size:100%;
 }
