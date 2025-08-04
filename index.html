@@ -38,14 +38,15 @@
 <container>
     <div>
         <div class='upload'>
-
         <div class='t'><tt>Place Adder</tt></div>
             <div class='css'>
                 <div id='add_div_0' style="display:none;">
                     <b>Category Name</b><br><input type="text" id="newCategory">
                     <button onclick="saveCategory()">Save</button>
                     <button onclick="switchdiv('add_div_0','add_div_1')">< Back</button>
+                    <button style="display:block;"id="manageCategoriesBtn" onclick="manageCategories()">Manage Categories</button><br>
                 </div>
+                <div id="categories-container" style="display:none;"></div>
                 <div id='add_div_1' style="display:block;">
                     <b>Name</b><br><input type="text" id="placeName"><br>
                     <b>Link</b><br><input type="text" id="placeUrl"><br> 
@@ -117,7 +118,6 @@ Use of this site signifies your acceptance of the Terms and Conditions.
 Privacy Policy  |  Contact Us  |  About Us  |  Jobs
 <br>
 </footer>
-
 </body>
 <script src="frontend.js"></script>
 </html>

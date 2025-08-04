@@ -1,13 +1,7 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
 //function play_sound(name) {var audio = new Audio();audio.src = 'data/needable/sounds/' + name;audio.autoplay = true;return true;}
-function play_sound(name) {
-    var audio = new Audio();
-    if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/needable/sounds/' + randomSound;} 
-    else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/needable/sounds/' + randomSound;}
-    else {audio.src = 'data/needable/sounds/' + name;}
-    audio.autoplay = true;
-    return true;
-}
+
+function play_sound(name) {var audio = new Audio();if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/needable/sounds/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/needable/sounds/' + randomSound;}else {audio.src = 'data/needable/sounds/' + name;}audio.autoplay = true;return true;}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;play_sound("click.mp3");}
 
@@ -55,9 +49,53 @@ function populateCategoryDropdowns() {
     const categorySelect = document.getElementById('placeCategory');const filterSelect = document.getElementById('categoryFilter');
     [categorySelect, filterSelect].forEach(select => {
         select.innerHTML = '';
-        categories.forEach(category => {
-            if (select === categorySelect && category === 'All') return;const option = document.createElement('option');option.value = category;option.textContent = category;select.appendChild(option);
+        categories.forEach(category => {if (select === categorySelect && category === 'All') return;const option = document.createElement('option');option.value = category;option.textContent = category;select.appendChild(option);
         });});categorySelect.value = 'None';filterSelect.value = 'All';
+}
+function manageCategories() {
+    const container = document.getElementById('categories-container');
+    const manageBtn = document.getElementById('manageCategoriesBtn');
+    if (container.style.display === 'none' || !container.innerHTML.trim()) {
+        container.innerHTML = `
+            <div class="categories-list">
+                ${categories.filter(cat => cat !== 'All' && cat !== 'None').map(cat => `
+                    <div class="category-item">
+                        <span>${cat}</span>
+                        <button onclick="deleteCategory('${cat}')" class="delete-category-btn">✖</button>
+                    </div>
+                `).join('')}
+            </div>
+            <button onclick="closeCategories()" class="close-btn">Close</button>
+        `;container.style.display = 'block';manageBtn.style.display = 'none';
+    } 
+    else {container.style.display = 'none';manageBtn.style.display = 'block';}
+    play_sound("click.mp3");
+}
+function closeCategories() {
+    const container = document.getElementById('categories-container');const manageBtn = document.getElementById('manageCategoriesBtn');
+    container.innerHTML = '';container.style.display = 'none';manageBtn.style.display = 'block';
+    play_sound("click.mp3");
+}
+function deleteCategory(category) {
+    if (!confirm(`Delete category "${category}"? All places in this category will be moved to "None".`)) {play_sound("ouch.mp3");return;}
+    categories = categories.filter(cat => cat !== category);localStorage.setItem('categories', JSON.stringify(categories));
+    const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
+    savedPlaces.forEach(place => {if (place.category === category) {place.category = '';}});localStorage.setItem('places', JSON.stringify(savedPlaces));
+    populateCategoryDropdowns();renderPlaces();
+    const categoriesContainer = document.getElementById('categories-container');
+    if (categoriesContainer && categoriesContainer.style.display !== 'none') {
+        const categoriesList = categoriesContainer.querySelector('.categories-list');
+        if (categoriesList) {
+            categoriesList.innerHTML = categories
+                .filter(cat => cat !== 'All' && cat !== 'None')
+                .map(cat => `
+                    <div class="category-item">
+                        <span>${cat}</span>
+                        <button onclick="deleteCategory('${cat}')" class="delete-category-btn">✖</button>
+                    </div>
+                `).join('');
+        }
+    }play_sound("collide.mp3");
 }
 // --------------------------------------------------------------------------------
 
@@ -164,7 +202,7 @@ function renderPlaces() {
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
-                <img src='data/needable/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3'])"alt="teddy"width="115px" title='Teddy Bloxpin'><br>
+                <img src='data/needable/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3']) "alt="teddy" width="115px" title='Teddy Bloxpin'><br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
         `;return;}
@@ -238,6 +276,12 @@ function setRandomBackground() {
         "data/needable/backgrounds/OIP%20(3).webp",
         "data/needable/backgrounds/OIP%20(2).webp",
         "data/needable/backgrounds/Mod_525859_sd_image.webp",
+        "data/needable/backgrounds/1.webp",
+        "data/needable/backgrounds/3.webp",
+        "data/needable/backgrounds/4.webp",
+        "data/needable/backgrounds/5.webp",
+        "data/needable/backgrounds/Life-o-Riley.jpg",
+        "data/needable/backgrounds/5.jpg"
     ];
     try {
         const customBanners = JSON.parse(localStorage.getItem('customBackgrounds')) || [];const banners = customBanners.length > 0 ? customBanners : defaultBanners;

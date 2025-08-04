@@ -1,5 +1,5 @@
 /* AUTHOR BY DeMorMr  | https://github.com/DeMorMr*/
-*{cursor:url(data/needable/ArrowCursor.png) 50 40, url(data/needable/ArrowFarCursor.png) 50 40, default;}
+*{cursor:url(data/needable/ArrowCursor.png) 40 40, auto !important;}
 
 @font-face {font-family:"Comic-Sans-MS";font-display:swap;src:url("data/needable/Comic-Sans-MS.woff2")format("woff2")}
 @font-face {font-family:"geo_1";font-display:swap;src:url("data/needable/microsoftsansserif.woff2")format("woff2")}
@@ -19,7 +19,9 @@ a{text-decoration:none;color:#2900ff;}
 
 .upload{border:1px solid #010101;width:150px;height:150px;font-size:11px;background-color:#eeeeee;margin-top:10px;}
 .center{text-align:center;}
-.center div{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;border-top:none;} .center a{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;border-bottom:none;}
+.center div{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;border-top:none;}
+.center a{background-color:#eeeeee;border:1px solid #010101;opacity:0.7;border-bottom:none;}
+
 .upload .css{padding:0px 5px 0px;}
 .upload .t{border-bottom:1px solid #010101;background-color:#cccccc;width:100%;height:20px;text-align:center;}
 .upload tt{font-family:Arial;letter-spacing:2px;}
@@ -49,8 +51,10 @@ a{text-decoration:none;color:#2900ff;}
 
 .empty-message {font-family:"geo_1", Arial;align-items:center;padding:50px;font-size:18px;color:#666;margin:20px auto;max-width:500px;}
 
-
- 
+#categories-container {margin-top:5px;max-height:50px;overflow-y:auto;border:1px solid #010101;padding:5px;}
+.categories-list {display: flex;flex-direction: column;gap:5px;}
+.category-item {height:10px;display:flex;justify-content:space-between;align-items:center;padding:5px;background:white;border:1px solid #010101;}
+#categories-container[style*="none"] + #manageCategoriesBtn {display:block;}
 
 .pagination {display:flex;justify-content:center;align-items:center;gap:10px;margin:0px 0;}
 .pagination button:disabled{opacity:0.5;cursor:not-allowed;}
