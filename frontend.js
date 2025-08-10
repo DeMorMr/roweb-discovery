@@ -5,6 +5,13 @@ function play_sound(name) {var audio = new Audio();if (typeof name === 'string' 
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;play_sound("click.mp3");}
 
+function switchSection(sectionId) {
+    document.querySelectorAll('.content-section').forEach(section => {section.style.display = 'none';});const targetSection = document.getElementById(sectionId);
+    if (targetSection) {targetSection.style.display = 'block';}play_sound("click.mp3");
+}
+function initPage() {document.querySelectorAll('.content-section').forEach((section, index) => {if (index !== 0) section.style.display = 'none';});}
+
+
 function extractPlaceId(url) {const match = url.match(/(?:\/\/|\b)(?:www\.)?(?:rblx\.games|roblox\.com)\/games\/(\d+)(?:\/|$|\?)/);return match ? match[1] : null;}
 function normalizeRobloxUrl(url) {const id = extractPlaceId(url);if (!id) return url.toLowerCase();return `https://www.roblox.com/games/${id}`;}
 
@@ -384,7 +391,19 @@ const tracks = [
     "data/needable/Audio/08.%20Roblox%20Soundtrack%20-%20Noob%20Alert.mp3","data/needable/Audio/07.%20Roblox%20Soundtrack%20-%20Trouble%20Ahead%20(BONUS%20SONG)%20(Teddy9340's%20Production).mp3",
     "data/needable/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3","data/needable/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
     "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3",
-    "data/needable/Audio/its-raining-tacos!.mp3"
+    "data/needable/Audio/its-raining-tacos!.mp3","data/needable/Audio/Toby%20Fox%20-%20A%20DARK%20ZONE.mp3",
+    // credit music
+    "data/needable/Credits/1.%20happy-pig_@warble_humanoid.mp3",
+    "data/needable/Credits/2.%20lancer-waltz_penilipo.mp3",
+    "data/needable/Credits/3.%20KEYGEN_penilipo.mp3",
+    "data/needable/Credits/4.%20NEW-TRY_MostoThisStuff.wav",
+    "data/needable/Credits/5.%20kqwke-Barrier.mp3",
+    "data/needable/Credits/6.%20Penilipo x Maomi_penilipo.mp3",
+    "data/needable/Credits/7.%20ExitedParty_penilipo.wav",
+    "data/needable/Credits/8.%208BITAMBIENT_penilipo.wav",
+    "data/needable/Credits/9.%20EarthboundSoundsOnly_penilipo.wav",
+    "data/needable/Credits/10.%20SEATURTLE_penilipo.mp3",
+    "data/needable/Credits/11.%20print-hello-world_@warble_humanoid.mp3",
 ];
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
@@ -496,3 +515,5 @@ window.onload = function() {
     audioPlayer.addEventListener('error', () => {errorMsg.textContent = `Error loading: ${audioPlayer.error ? audioPlayer.error.message : 'Unknown error'}`;setTimeout(nextTrack, 2000);});
     document.querySelector('.progress').addEventListener('click',(e) => {if (!audioPlayer.duration) return;const progressWidth=e.currentTarget.clientWidth;const clickPosition=e.offsetX;audioPlayer.currentTime=(clickPosition / progressWidth) * audioPlayer.duration;});
 };
+
+
