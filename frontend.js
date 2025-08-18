@@ -78,11 +78,8 @@ function manageCategories() {
     else {container.style.display = 'none';manageBtn.style.display = 'block';}
     play_sound("click.mp3");
 }
-function closeCategories() {
-    const container = document.getElementById('categories-container');const manageBtn = document.getElementById('manageCategoriesBtn');
-    container.innerHTML = '';container.style.display = 'none';manageBtn.style.display = 'block';
-    play_sound("click.mp3");
-}
+function closeCategories() {const container=document.getElementById('categories-container');const manageBtn=document.getElementById('manageCategoriesBtn');container.innerHTML='';container.style.display='none';manageBtn.style.display='block';play_sound("click.mp3");}
+
 function deleteCategory(category) {
     if (!confirm(`Delete category "${category}"? All places in this category will be moved to "None".`)) {play_sound("ouch.mp3");return;}
     categories = categories.filter(cat => cat !== category);localStorage.setItem('categories', JSON.stringify(categories));
@@ -192,7 +189,7 @@ async function loadCoolThumbnails(places) {
     for (let i = 0; i < places.length; i += BATCH_SIZE) {
         const batch = places.slice(i, i + BATCH_SIZE);const validPlaces = batch.filter(place => place.id && place.id.length >= 7);const placeIds = validPlaces.map(place => place.id);
         validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.webp';});if (placeIds.length === 0) continue;
-        try {const thumbnails = await getBatchThumbnailUrls(placeIds, 512);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';}});
+        try {const thumbnails = await getBatchThumbnailUrls(placeIds, 128);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';}});
         } catch (error) {console.error('Cool thumbnail batch error:', error);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
     }
 }
@@ -304,8 +301,7 @@ function setRandomBackground() {
 }
 
 // USERPLACES --------------------------------------------------------------------------------
-let coolPlacesHistory = [];
-let currentCoolIndex = -1;
+let coolPlacesHistory = [];let currentCoolIndex = -1;
 function updateCoolPlaces() {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const container = document.querySelector('.UserPlaces');
     container.innerHTML = '';
