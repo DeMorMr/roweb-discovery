@@ -222,7 +222,7 @@ function renderPlaces() {
         <div class="place" data-id="${place.originalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
                 <img id="img-${place.originalIndex}" src="data/needable/loading.webp" alt="${place.name}" title='${place.name}' decoding="async">
-                ${editMode ? '' : `<br><t><small>${place.name}</small></t><br>`}
+                ${editMode ? '' : `<t><small>${place.name}</small></t><br>`}
             </a>
             ${editMode ? `
                 <div class="edit-controls">
