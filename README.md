@@ -25,7 +25,7 @@ P.s: no background!, its bad photoshop
 <div align="center">
 <h1>🔺Road Map🔻</h1>
 <img>
-Somewhere in 2025?
+Somewhere in 2025-26?
 <br>
  1. little fixes 
 <br>
