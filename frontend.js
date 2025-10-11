@@ -1,7 +1,7 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
-//function play_sound(name) {var audio = new Audio();audio.src = 'data/needable/sounds/' + name;audio.autoplay = true;return true;}
+//function play_sound(name) {var audio = new Audio();audio.src = 'data/main/sounds/' + name;audio.autoplay = true;return true;}
 
-function play_sound(name) {var audio = new Audio();if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/needable/sounds/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/needable/sounds/' + randomSound;}else {audio.src = 'data/needable/sounds/' + name;}audio.autoplay = true;return true;}
+function play_sound(name) {var audio = new Audio();if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/main/sounds/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/main/sounds/' + randomSound;}else {audio.src = 'data/main/sounds/' + name;}audio.autoplay = true;return true;}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;play_sound("click.mp3");}
 
@@ -180,17 +180,17 @@ async function getBatchThumbnailUrls(placeIds, size = 128) { // 256
 async function loadThumbnails(placesToShow, startIndex) {
     for (let i = 0; i < placesToShow.length; i += BATCH_SIZE) {
         const batch = placesToShow.slice(i, i + BATCH_SIZE);const placeIds = batch.map(place => place.id).filter(id => id && id.length >= 7);
-        batch.forEach((place, localIndex) => {const img = document.getElementById(`img-${place.originalIndex}`);if (img) img.src = 'data/needable/loading.webp';});if (placeIds.length === 0) continue;
-        try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place) => {const img = document.getElementById(`img-${place.originalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';});
-        } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place) => {const img=document.getElementById(`img-${place.originalIndex}`);if (img) img.src='data/needable/NewFrontPageGuy.png';});}
+        batch.forEach((place, localIndex) => {const img = document.getElementById(`img-${place.originalIndex}`);if (img) img.src = 'data/main/loading.webp';});if (placeIds.length === 0) continue;
+        try {const thumbnails = await getBatchThumbnailUrls(placeIds);batch.forEach((place) => {const img = document.getElementById(`img-${place.originalIndex}`);if (!img) return;img.src = thumbnails[place.id] || 'data/main/NewFrontPageGuy.png';});
+        } catch (error) {console.error('Thumbnail batch error:', error);batch.forEach((place) => {const img=document.getElementById(`img-${place.originalIndex}`);if (img) img.src='data/main/NewFrontPageGuy.png';});}
     }
 }
 async function loadCoolThumbnails(places) {
     for (let i = 0; i < places.length; i += BATCH_SIZE) {
         const batch = places.slice(i, i + BATCH_SIZE);const validPlaces = batch.filter(place => place.id && place.id.length >= 7);const placeIds = validPlaces.map(place => place.id);
-        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/loading.webp';});if (placeIds.length === 0) continue;
-        try {const thumbnails = await getBatchThumbnailUrls(placeIds, 128);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/needable/NewFrontPageGuy.png';}});
-        } catch (error) {console.error('Cool thumbnail batch error:', error);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/needable/NewFrontPageGuy.png';});}
+        validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/main/loading.webp';});if (placeIds.length === 0) continue;
+        try {const thumbnails = await getBatchThumbnailUrls(placeIds, 128);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) {img.src = thumbnails[place.id] || 'data/main/NewFrontPageGuy.png';}});
+        } catch (error) {console.error('Cool thumbnail batch error:', error);validPlaces.forEach(place => {const img = document.querySelector(`.UserPlace img[data-place-id="${place.id}"]`);if (img) img.src = 'data/main/NewFrontPageGuy.png';});}
     }
 }
 // --------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ function renderPlaces() {
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
-                <img src='data/needable/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3']) "alt="teddy" width="115px" title='Teddy Bloxpin'><br>
+                <img src='data/main/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3']) "alt="teddy" width="115px" title='Teddy Bloxpin'><br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
         `;return;}
@@ -221,7 +221,7 @@ function renderPlaces() {
         container.innerHTML += `
         <div class="place" data-id="${place.originalIndex}">
             <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
-                <img id="img-${place.originalIndex}" src="data/needable/loading.webp" alt="${place.name}" title='${place.name}' decoding="async">
+                <img id="img-${place.originalIndex}" src="data/main/loading.webp" alt="${place.name}" title='${place.name}' decoding="async">
                 ${editMode ? '' : `<t><small>${place.name}</small></t><br>`}
             </a>
             ${editMode ? `
@@ -256,9 +256,9 @@ function clearAllPlaces() {if (confirm("Are you sure you want to delete ALL save
 
 function setRandomBanner() {
     const defaultBanners = [
-        "data/needable/banners/2007ChristmasBanner.webp","data/needable/banners/2007HalloweenBanner.webp",
-        "data/needable/banners/2008NoLogoBanner.webp","data/needable/banners/BuildermanBanner.webp",
-        "data/needable/banners/ChristmasBanner2008.webp"
+        "data/main/banners/2007ChristmasBanner.webp","data/main/banners/2007HalloweenBanner.webp",
+        "data/main/banners/2008NoLogoBanner.webp","data/main/banners/BuildermanBanner.webp",
+        "data/main/banners/ChristmasBanner2008.webp"
     ];
     try {
         const customBanners = JSON.parse(localStorage.getItem('customBanners')) || [];const banners = customBanners.length > 0 ? customBanners : defaultBanners;
@@ -270,22 +270,22 @@ function setRandomBanner() {
             header.style.backgroundRepeat = 'no-repeat';
             header.style.transition = 'background-image 0.5s ease-in-out';
         }
-    } catch (error) {console.error('Error setting banner:', error);const header = document.querySelector('.banner');if (header) {header.style.backgroundImage = "url('data/needable/NewFrontPageGuy.png')";}}
+    } catch (error) {console.error('Error setting banner:', error);const header = document.querySelector('.banner');if (header) {header.style.backgroundImage = "url('data/main/NewFrontPageGuy.png')";}}
 }
 
 function setRandomBackground() {
     const defaultBanners = [
-        "data/needable/backgrounds/RobloxScreenShot20230930_102558741.jpeg",
-        "data/needable/backgrounds/p8wXp8.jpg",
-        "data/needable/backgrounds/OIP%20(3).webp",
-        "data/needable/backgrounds/OIP%20(2).webp",
-        "data/needable/backgrounds/Mod_525859_sd_image.webp",
-        "data/needable/backgrounds/1.webp",
-        "data/needable/backgrounds/3.webp",
-        "data/needable/backgrounds/4.webp",
-        "data/needable/backgrounds/5.webp",
-        "data/needable/backgrounds/Life-o-Riley.jpg",
-        "data/needable/backgrounds/5.jpg"
+        "data/main/backgrounds/RobloxScreenShot20230930_102558741.jpeg",
+        "data/main/backgrounds/p8wXp8.jpg",
+        "data/main/backgrounds/OIP%20(3).webp",
+        "data/main/backgrounds/OIP%20(2).webp",
+        "data/main/backgrounds/Mod_525859_sd_image.webp",
+        "data/main/backgrounds/1.webp",
+        "data/main/backgrounds/3.webp",
+        "data/main/backgrounds/4.webp",
+        "data/main/backgrounds/5.webp",
+        "data/main/backgrounds/Life-o-Riley.jpg",
+        "data/main/backgrounds/5.jpg"
     ];
     try {
         const customBanners = JSON.parse(localStorage.getItem('customBackgrounds')) || [];const banners = customBanners.length > 0 ? customBanners : defaultBanners;
@@ -297,7 +297,7 @@ function setRandomBackground() {
             header.style.backgroundRepeat = 'no-repeat';
             header.style.transition = 'background-image 0.5s ease-in-out';
         }
-    } catch (error) {console.error('Error setting background:', error);const header = document.querySelector('body');if (header) {header.style.backgroundImage = "url('data/needable/NewFrontPageGuy.png')";}}
+    } catch (error) {console.error('Error setting background:', error);const header = document.querySelector('body');if (header) {header.style.backgroundImage = "url('data/main/NewFrontPageGuy.png')";}}
 }
 
 // USERPLACES --------------------------------------------------------------------------------
@@ -305,13 +305,13 @@ let coolPlacesHistory = [];let currentCoolIndex = -1;
 function updateCoolPlaces() {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const container = document.querySelector('.UserPlaces');
     container.innerHTML = '';
-    if (savedPlaces.length === 0) {for (let i = 0; i < 5; i++) {container.innerHTML += `<div class='UserPlace'><a href=''><img src='data/needable/loading.webp'><br></a></div>`;}return;}
+    if (savedPlaces.length === 0) {for (let i = 0; i < 5; i++) {container.innerHTML += `<div class='UserPlace'><a href=''><img src='data/main/loading.webp'><br></a></div>`;}return;}
     const currentSet = coolPlacesHistory[currentCoolIndex] || [];
     currentSet.forEach(place => {
         container.innerHTML += `
             <div class='UserPlace'>
                 <a onclick="play_sound('splat.mp3')" href='${place.url}' target='_blank'>
-                    <img src='data/needable/loading.webp' data-place-id="${place.id}"alt="${place.name}" title='${place.name}'><br>
+                    <img src='data/main/loading.webp' data-place-id="${place.id}"alt="${place.name}" title='${place.name}'><br>
                 </a>
             </div>
         `;
@@ -370,36 +370,37 @@ function handleFileSelect(event) {
 
 // MUSIC PLAYER --------------------------------------------------------------------------------
 const tracks = [
-    "data/needable/Audio/Michael%20Wyckoff%20-%20Keygen.mp3","data/needable/Audio/Roblox%20Monster%20Mash%20Potion%20Remix%20｜%20Classy%20Doge%20Remix.mp3",
-    "data/needable/Audio/Positively%20Dark-%20Awakening.mp3","data/needable/Audio/Ragnarok%20Online%20-%20Monastery%20in%20Disguise%20(Cursed%20Abbey⧸Monastery)%20HD.mp3",
-    "data/needable/Audio/old%20roblox%20dance｜Roblox.mp3","data/needable/Audio/M.U.L.E%20Theme%20(ROBLOX%20music).mp3",
-    "data/needable/Audio/Flight%20of%20the%20Bumblebee%20Roblox.mp3","data/needable/Audio/Caramelldansen%20-%20Supergott%20-%20Roblox%20Music.mp3",
-    "data/needable/Audio/Bossfight%20-%20Starship%20Showdown.mp3","data/needable/Audio/Bossfight%20-%20Milky%20Ways.mp3",
-    "data/needable/Audio/Bossfight%20-%20Leaving%20Leafwood%20Forest.mp3",
-    "data/needable/Audio/Bossfight%20-%20Farbror%20Melker%20Fixar%20Fiskdamm%20(Fastbom%20Cover).mp3","data/needable/Audio/Bossfight%20-%20Commando%20Steve.mp3",
-    "data/needable/Audio/Bossfight%20-%20Captain%20Cool.mp3","data/needable/Audio/Better%20Off%20Alone%20-%20Glejs%20(Remix).mp3",
-    "data/needable/Audio/30.%20Roblox%20Soundtrack%20-%20Party%20Music%20(2008).mp3","data/needable/Audio/29.%20Roblox%20Soundtrack%20-%20Explore%20ROBLOX.mp3",
-    "data/needable/Audio/28.%20Roblox%20Soundtrack%20-%20Online%20Social%20Hangout.mp3","data/needable/Audio/23.%20Roblox%20Soundtrack%20-%20Tycoon%20Game.mp3",
-    "data/needable/Audio/19.%20Roblox%20Soundtrack%20-%20Santa's%20Winter%20Stronghold.mp3","data/needable/Audio/18.%20Roblox%20Soundtrack%20-%201x1x1x1's%20Creed.mp3",
-    "data/needable/Audio/17.%20Roblox%20Soundtrack%20-%20Big%20Clan⧸Group%20Recruitment%20Centre%20Entrance.mp3",
-    "data/needable/Audio/16.%20Roblox%20Soundtrack%20-%20Heli%20Wars.mp3","data/needable/Audio/13.%20Roblox%20Soundtrack%20-%20Contest%20Time!.mp3",
-    "data/needable/Audio/11.%20Roblox%20Soundtrack%20-%20Clan%20Being%20Raided.mp3","data/needable/Audio/09.%20Roblox%20Soundtrack%20-%20Crossroads%20Times.mp3",
-    "data/needable/Audio/08.%20Roblox%20Soundtrack%20-%20Noob%20Alert.mp3","data/needable/Audio/07.%20Roblox%20Soundtrack%20-%20Trouble%20Ahead%20(BONUS%20SONG)%20(Teddy9340's%20Production).mp3",
-    "data/needable/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3","data/needable/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
-    "data/needable/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/needable/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3",
-    "data/needable/Audio/its-raining-tacos!.mp3","data/needable/Audio/Toby%20Fox%20-%20A%20DARK%20ZONE.mp3",
+    "data/main/Audio/Michael%20Wyckoff%20-%20Keygen.mp3","data/main/Audio/Roblox%20Monster%20Mash%20Potion%20Remix%20｜%20Classy%20Doge%20Remix.mp3",
+    "data/main/Audio/Positively%20Dark-%20Awakening.mp3","data/main/Audio/Ragnarok%20Online%20-%20Monastery%20in%20Disguise%20(Cursed%20Abbey⧸Monastery)%20HD.mp3",
+    "data/main/Audio/old%20roblox%20dance｜Roblox.mp3","data/main/Audio/M.U.L.E%20Theme%20(ROBLOX%20music).mp3",
+    "data/main/Audio/Flight%20of%20the%20Bumblebee%20Roblox.mp3","data/main/Audio/Caramelldansen%20-%20Supergott%20-%20Roblox%20Music.mp3",
+    "data/main/Audio/Bossfight%20-%20Starship%20Showdown.mp3","data/main/Audio/Bossfight%20-%20Milky%20Ways.mp3",
+    "data/main/Audio/Bossfight%20-%20Leaving%20Leafwood%20Forest.mp3",
+    "data/main/Audio/Bossfight%20-%20Farbror%20Melker%20Fixar%20Fiskdamm%20(Fastbom%20Cover).mp3","data/main/Audio/Bossfight%20-%20Commando%20Steve.mp3",
+    "data/main/Audio/Bossfight%20-%20Captain%20Cool.mp3","data/main/Audio/Better%20Off%20Alone%20-%20Glejs%20(Remix).mp3",
+    "data/main/Audio/30.%20Roblox%20Soundtrack%20-%20Party%20Music%20(2008).mp3","data/main/Audio/29.%20Roblox%20Soundtrack%20-%20Explore%20ROBLOX.mp3",
+    "data/main/Audio/28.%20Roblox%20Soundtrack%20-%20Online%20Social%20Hangout.mp3","data/main/Audio/23.%20Roblox%20Soundtrack%20-%20Tycoon%20Game.mp3",
+    "data/main/Audio/19.%20Roblox%20Soundtrack%20-%20Santa's%20Winter%20Stronghold.mp3","data/main/Audio/18.%20Roblox%20Soundtrack%20-%201x1x1x1's%20Creed.mp3",
+    "data/main/Audio/17.%20Roblox%20Soundtrack%20-%20Big%20Clan⧸Group%20Recruitment%20Centre%20Entrance.mp3",
+    "data/main/Audio/16.%20Roblox%20Soundtrack%20-%20Heli%20Wars.mp3","data/main/Audio/13.%20Roblox%20Soundtrack%20-%20Contest%20Time!.mp3",
+    "data/main/Audio/11.%20Roblox%20Soundtrack%20-%20Clan%20Being%20Raided.mp3","data/main/Audio/09.%20Roblox%20Soundtrack%20-%20Crossroads%20Times.mp3",
+    "data/main/Audio/08.%20Roblox%20Soundtrack%20-%20Noob%20Alert.mp3","data/main/Audio/07.%20Roblox%20Soundtrack%20-%20Trouble%20Ahead%20(BONUS%20SONG)%20(Teddy9340's%20Production).mp3",
+    "data/main/Audio/06.%20Roblox%20Soundtrack%20-%20Metal%20Bricks.mp3","data/main/Audio/05.%20Roblox%20Soundtrack%20-%20Robloxia's%20Last%20Stand.mp3",
+    "data/main/Audio/03.%20Roblox%20Soundtrack%20-%20Happy%20Day%20In%20Robloxia⧸Roblox%20HQ.mp3","data/main/Audio/01.%20Roblox%20Soundtrack%20-%20The%20Main%20Theme.mp3",
+    "data/main/Audio/its-raining-tacos!.mp3","data/main/Audio/Toby%20Fox%20-%20A%20DARK%20ZONE.mp3",
     // credit music
-    "data/needable/Credits/1.%20happy-pig_@warble_humanoid.mp3",
-    "data/needable/Credits/2.%20lancer-waltz_penilipo.mp3",
-    "data/needable/Credits/3.%20KEYGEN_penilipo.mp3",
-    "data/needable/Credits/4.%20NEW-TRY_MostoThisStuff.wav",
-    "data/needable/Credits/5.%20kqwke-Barrier.mp3",
-    "data/needable/Credits/6.%20Penilipo x Maomi_penilipo.mp3",
-    "data/needable/Credits/7.%20ExitedParty_penilipo.wav",
-    "data/needable/Credits/8.%208BITAMBIENT_penilipo.wav",
-    "data/needable/Credits/9.%20EarthboundSoundsOnly_penilipo.wav",
-    "data/needable/Credits/10.%20SEATURTLE_penilipo.mp3",
-    "data/needable/Credits/11.%20print-hello-world_@warble_humanoid.mp3",
+    "data/main/Credits/1.%20happy-pig_@warble_humanoid.mp3",
+    "data/main/Credits/2.%20lancer-waltz_penilipo.mp3",
+    "data/main/Credits/3.%20KEYGEN_penilipo.mp3",
+    "data/main/Credits/4.%20NEW-TRY_MostoThisStuff.wav",
+    "data/main/Credits/5.%20kqwke-Barrier.mp3",
+    "data/main/Credits/6.%20Penilipo x Maomi_penilipo.mp3",
+    "data/main/Credits/7.%20ExitedParty_penilipo.wav",
+    "data/main/Credits/8.%208BITAMBIENT_penilipo.wav",
+    "data/main/Credits/9.%20EarthboundSoundsOnly_penilipo.wav",
+    "data/main/Credits/10.%20SEATURTLE_penilipo.mp3",
+    "data/main/Credits/11.%20print-hello-world_@warble_humanoid.mp3",
+    "data/main/Credits/evilbell_imsosha.mp3",
 ];
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');

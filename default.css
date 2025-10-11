@@ -1,16 +1,16 @@
 /* AUTHOR BY DeMorMr  | https://github.com/DeMorMr*/
-*{cursor:url(data/needable/ArrowCursor.png) 40 40, auto !important;}
+*{cursor:url(data/main/ArrowCursor.png) 40 40, auto !important;}
 
-@font-face {font-family:"Comic-Sans-MS";font-display:swap;src:url("data/needable/Comic-Sans-MS.woff2")format("woff2")}
-@font-face {font-family:"geo_1";font-display:swap;src:url("data/needable/microsoftsansserif.woff2")format("woff2")}
+@font-face {font-family:"Comic-Sans-MS";font-display:swap;src:url("data/main/Comic-Sans-MS.woff2")format("woff2")}
+@font-face {font-family:"geo_1";font-display:swap;src:url("data/main/microsoftsansserif.woff2")format("woff2")}
 body {max-width:900px;margin:0 auto;padding:20px;
- background-image:url('data/needable/loading.webp');
+ background-image:url('data/main/loading.webp');
  font-family:Comic-Sans-MS, sans-serif;
  image-rendering:pixelated;background-size:100%;
 }
 
 header {border:1px solid #010101;text-align:center;width:900px;height:70px;} header img{margin-top:5px;}
-.banner{background-image:url('data/needable/loading.webp');background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.5s ease-in-out;}
+.banner{background-image:url('data/main/loading.webp');background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.5s ease-in-out;}
 footer{font-family:Arial;font-size:10px;text-align:center;padding-top:10px;}
 container{display:flex;gap:10px;}
 a{text-decoration:none;color:#2900ff;}
@@ -40,7 +40,7 @@ a{text-decoration:none;color:#2900ff;}
 .place desc{font-size:9px;} /*10px*/
 
 .cool{
-  background-image:url("data/needable/every_old_roblox_assets_ever__2006_2014_esque_by_arodiguezb_dj5puy7.webp");background-position:center;background-repeat:no-repeat;background-size:100%;
+  background-image:url("data/main/every_old_roblox_assets_ever__2006_2014_esque_by_arodiguezb_dj5puy7.webp");background-position:center;background-repeat:no-repeat;background-size:100%;
   border:1px solid #010101;width:100%;height:90px;margin-top:10px;position:relative;} /*padding:5px;*/
 .cool .tb{font-size:12px;color:#333333;display:inline-block;padding:5px 10px 0px;} /*border:1px solid red;*/
 .cool .d{border-right:1px solid #010101;background-color:#bbbbbb;width:161px;height:100%;}
@@ -70,11 +70,11 @@ select:focus{background-color:#6e99c9;color:white;}
 button{border:none;border:1px solid #777777;margin-top:5px;background:#ffffff;color:#777777;font-size:10px;min-width:40px;min-height:20px;}
 button:hover{background:#6e99c9;color:#ffffff;text-decoration:underline;border:1px solid #000000;}
 
-.music-player{background-image:url('data/needable/banners/');background-size:cover;background-position:center;background-repeat:no-repeat;margin-top:10px;}
+.music-player{background-image:url('data/main/banners/');background-size:cover;background-position:center;background-repeat:no-repeat;margin-top:10px;}
 .track-info {border:1px solid #010101;height:5px;overflow:hidden;position:relative;background:rgba(0,0,0,0.2);padding:10px;}
 .track-name {
   text-shadow:-1px 0 0 red,0 -1px 0 red,1px 0 0 red,0 1px 0 red; 
-  font-size:20px;font-family:'geo_1', Arial;color:white;background-image:url('data/needable/banners/old-roblox-banners-v0-ioau0u85om7b1.webp');background-size:cover;background-position:center;background-repeat:no-repeat;position:absolute;white-space:nowrap;animation:moveText 15s linear infinite;margin-top:-8px;}
+  font-size:20px;font-family:'geo_1', Arial;color:white;background-image:url('data/main/banners/old-roblox-banners-v0-ioau0u85om7b1.webp');background-size:cover;background-position:center;background-repeat:no-repeat;position:absolute;white-space:nowrap;animation:moveText 15s linear infinite;margin-top:-8px;}
 .controls {display:flex;justify-content:space-between;}
 .volume-container {display:flex;align-items:center;gap:10px;}
 .progress {height:4px;background:black;border:1px solid red;margin-top:5px;overflow:hidden;}
