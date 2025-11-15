@@ -19,7 +19,6 @@ powered by my Friends & bad discovery roblox.
 <div>
 <h1 align="center">💥POWERING IMAGINATION!</h1>
 <img src='https://github.com/DeMorMr/roweb.github.io/blob/main/data/main/info.jpg'>
-P.s: no background!, its bad photoshop
 </div>
 
 <div align="center">
@@ -27,11 +26,13 @@ P.s: no background!, its bad photoshop
 <img>
 Somewhere in 2025-26?
 <br>
- 1. little fixes 
+ 1. Little fixes / Browsers compatibility
 <br>
  2. Custom Themes?
 <br>
- 3. Other
+ 3. Other, secret :)
+<br>
+ 4. Something? Join our Discord server and suggest an idea!
 </div>
 
 <h1 aligin='top'><image src="https://github.com/DeMorMr/Default-Discord-Bot/blob/main/.github/assets/icon_document.svg" alt="icon document" width="50">I make this, alone :( If u want help me join to discord server</h1>
