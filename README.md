@@ -18,7 +18,7 @@ powered by my Friends & bad discovery roblox.
 
 <div>
 <h1 align="center">💥POWERING IMAGINATION!</h1>
-<img src='https://github.com/DeMorMr/roweb.github.io/blob/main/data/needable/info.jpg'>
+<img src='https://github.com/DeMorMr/roweb.github.io/blob/main/data/n/info.jpg'>
 P.s: no background!, its bad photoshop
 </div>
 
