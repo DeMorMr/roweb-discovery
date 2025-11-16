@@ -1,13 +1,13 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
-//function play_sound(name) {var audio = new Audio();audio.src = 'data/main/sounds/' + name;audio.autoplay = true;return true;}
+//function sound(name) {var audio = new Audio();audio.src = 'data/main/sounds/' + name;audio.autoplay = true;return true;}
 
-function play_sound(name) {var audio = new Audio();if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/main/sounds/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/main/sounds/' + randomSound;}else {audio.src = 'data/main/sounds/' + name;}audio.autoplay = true;return true;}
+function sound(name) {var audio = new Audio();if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/main/sounds/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/main/sounds/' + randomSound;}else {audio.src = 'data/main/sounds/' + name;}audio.autoplay = true;return true;}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
-function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;play_sound("click.mp3");}
+function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;sound("click.mp3");}
 
 function switchSection(sectionId) {
     document.querySelectorAll('.content-section').forEach(section => {section.style.display = 'none';});const targetSection = document.getElementById(sectionId);
-    if (targetSection) {targetSection.style.display = 'block';}play_sound("click.mp3");
+    if (targetSection) {targetSection.style.display = 'block';}sound("click.mp3");
 }
 function initPage() {document.querySelectorAll('.content-section').forEach((section, index) => {if (index !== 0) section.style.display = 'none';});}
 
@@ -47,10 +47,10 @@ function initCategories() {
 }
 function saveCategory() {
     const newCategory = document.getElementById('newCategory').value.trim();
-    if (!newCategory) {alert("Please enter a category name!");play_sound("ouch.mp3");return;}if (newCategory.length > 10) {alert("Place name cannot exceed 10 characters!");play_sound("ouch.mp3");return;}
+    if (!newCategory) {alert("Please enter a category name!");sound("ouch.mp3");return;}if (newCategory.length > 10) {alert("Place name cannot exceed 10 characters!");sound("ouch.mp3");return;}
     if (newCategory === 'All' || newCategory === 'None') {alert("Category name cannot be 'All' or 'None'!");return;}if (categories.includes(newCategory)) {alert("This category already exists!");return;}
     categories.push(newCategory);localStorage.setItem('categories', JSON.stringify(categories));document.getElementById('newCategory').value = '';
-    populateCategoryDropdowns();play_sound("splat.mp3");
+    populateCategoryDropdowns();sound("splat.mp3");
 }
 function populateCategoryDropdowns() {
     const categorySelect = document.getElementById('placeCategory');const filterSelect = document.getElementById('categoryFilter');
@@ -76,12 +76,12 @@ function manageCategories() {
         `;container.style.display = 'block';manageBtn.style.display = 'none';
     } 
     else {container.style.display = 'none';manageBtn.style.display = 'block';}
-    play_sound("click.mp3");
+    sound("click.mp3");
 }
-function closeCategories() {const container=document.getElementById('categories-container');const manageBtn=document.getElementById('manageCategoriesBtn');container.innerHTML='';container.style.display='none';manageBtn.style.display='block';play_sound("click.mp3");}
+function closeCategories() {const container=document.getElementById('categories-container');const manageBtn=document.getElementById('manageCategoriesBtn');container.innerHTML='';container.style.display='none';manageBtn.style.display='block';sound("click.mp3");}
 
 function deleteCategory(category) {
-    if (!confirm(`Delete category "${category}"? All places in this category will be moved to "None".`)) {play_sound("ouch.mp3");return;}
+    if (!confirm(`Delete category "${category}"? All places in this category will be moved to "None".`)) {sound("ouch.mp3");return;}
     categories = categories.filter(cat => cat !== category);localStorage.setItem('categories', JSON.stringify(categories));
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
     savedPlaces.forEach(place => {if (place.category === category) {place.category = '';}});localStorage.setItem('places', JSON.stringify(savedPlaces));
@@ -99,7 +99,7 @@ function deleteCategory(category) {
                     </div>
                 `).join('');
         }
-    }play_sound("collide.mp3");
+    }sound("collide.mp3");
 }
 // --------------------------------------------------------------------------------
 
@@ -108,13 +108,13 @@ function deleteCategory(category) {
 // --------------------------------------------------------------------------------
 function savePlace() {
     const name=document.getElementById('placeName').value;const url=document.getElementById('placeUrl').value;const category=document.getElementById('placeCategory').value;
-    if (name.length > 50) {alert("Place name cannot exceed 39 characters!");play_sound("ouch.mp3");return;}if (!name || !url) {alert("Please fill both fields!");play_sound("ouch.mp3");return;}
+    if (name.length > 50) {alert("Place name cannot exceed 39 characters!");sound("ouch.mp3");return;}if (!name || !url) {alert("Please fill both fields!");sound("ouch.mp3");return;}
     let id=extractPlaceId(url);if (!id) {const numMatch = url.match(/\b(\d+)\b/);if (numMatch && numMatch[1].length >= 7) {id = numMatch[1];}}
     const savedPlaces=JSON.parse(localStorage.getItem('places')) || [];const normalizedUrl=normalizeRobloxUrl(url);
     const isDuplicate=savedPlaces.some(place => {if (id && place.id && place.id === id) return true;const placeNormalizedUrl = normalizeRobloxUrl(place.url);return placeNormalizedUrl === normalizedUrl;});
     if (isDuplicate) {alert("This place is already saved!");return;}const storeCategory = category === 'None' ? '' : category;
     const place = {id,name,url,category:storeCategory,normalizedUrl:normalizedUrl,date:new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')};
-    savedPlaces.push(place);localStorage.setItem('places', JSON.stringify(savedPlaces));play_sound("splat.mp3");renderPlaces();clearForm();
+    savedPlaces.push(place);localStorage.setItem('places', JSON.stringify(savedPlaces));sound("splat.mp3");renderPlaces();clearForm();
 }
 function downloadData() {
     const savedPlaces=JSON.parse(localStorage.getItem('places')) || [];const categories=JSON.parse(localStorage.getItem('categories')) || ['All', 'None'];
@@ -122,7 +122,7 @@ function downloadData() {
     const dataStr = JSON.stringify(exportData, null, 2);const blob = new Blob([dataStr], {type: 'application/json'});const url = URL.createObjectURL(blob);const a = document.createElement('a');
     a.href=url;a.download='saved.json';
     document.body.appendChild(a);a.click();
-    setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);play_sound("click.mp3");
+    setTimeout(() => {document.body.removeChild(a);URL.revokeObjectURL(url);}, 100);sound("click.mp3");
 }
 // --------------------------------------------------------------------------------
 
@@ -196,7 +196,7 @@ async function loadCoolThumbnails(places) {
 // --------------------------------------------------------------------------------
 
 
-let editMode=false;function toggleEditMode() {editMode = !editMode;renderPlaces();play_sound(editMode ? "click.mp3" : "splat.mp3");}
+let editMode=false;function toggleEditMode() {editMode = !editMode;renderPlaces();sound(editMode ? "click.mp3" : "splat.mp3");}
 
 let currentPage=0;const itemsPerPage=15;
 function renderPlaces() {
@@ -206,7 +206,7 @@ function renderPlaces() {
             <div class="empty-message">
                 What's here is empty :(<br>
                 Want to see my list?<br>
-                <img src='data/main/teddy.png' onclick="play_sound(['1.mp3','2.mp3','3.mp3','4.mp3']) "alt="teddy" width="115px" title='Teddy Bloxpin'><br>
+                <img src='data/main/teddy.png' onclick="sound(['1.mp3','2.mp3','3.mp3','4.mp3']) "alt="teddy" width="115px" title='Teddy Bloxpin'><br>
                 <button onclick="loadDefaultList()">Load</button>
             </div>
         `;return;}
@@ -220,7 +220,7 @@ function renderPlaces() {
         const globalIndex = startIndex + index;const displayCategory = place.category ? place.category : 'None';
         container.innerHTML += `
         <div class="place" data-id="${place.originalIndex}">
-            <a onclick="play_sound('splat.mp3')" href="${place.url}" target="_blank">
+            <a onclick="sound('splat.mp3')" href="${place.url}" target="_blank">
                 <img id="img-${place.originalIndex}" src="data/main/loading.webp" alt="${place.name}" title='${place.name}' decoding="async">
                 ${editMode ? '' : `<t><small>${place.name}</small></t><br>`}
             </a>
@@ -250,9 +250,9 @@ function renderPagination(totalPages) {
     container.innerHTML = paginationHTML;
 }
 
-function changePage(newPage) {currentPage = newPage;renderPlaces();play_sound("pageturn.mp3");}
+function changePage(newPage) {currentPage = newPage;renderPlaces();sound("pageturn.mp3");}
 
-function clearAllPlaces() {if (confirm("Are you sure you want to delete ALL saved places? This action cannot be undone!")) {localStorage.removeItem('places');localStorage.removeItem('categories');clearThumbnailCache();renderPlaces();play_sound("collide.mp3");}}
+function clearAllPlaces() {if (confirm("Are you sure you want to delete ALL saved places? This action cannot be undone!")) {localStorage.removeItem('places');localStorage.removeItem('categories');clearThumbnailCache();renderPlaces();sound("collide.mp3");}}
 
 function setRandomBanner() {
     const defaultBanners = [
@@ -310,7 +310,7 @@ function updateCoolPlaces() {
     currentSet.forEach(place => {
         container.innerHTML += `
             <div class='UserPlace'>
-                <a onclick="play_sound('splat.mp3')" href='${place.url}' target='_blank'>
+                <a onclick="sound('splat.mp3')" href='${place.url}' target='_blank'>
                     <img src='data/main/loading.webp' data-place-id="${place.id}"alt="${place.name}" title='${place.name}'><br>
                 </a>
             </div>
@@ -327,9 +327,9 @@ function generateRandomPlaces() {
 function nextCoolSet() {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];if (savedPlaces.length === 0) return;const newSet = generateRandomPlaces();
     coolPlacesHistory = coolPlacesHistory.slice(0, currentCoolIndex + 1);coolPlacesHistory.push(newSet);currentCoolIndex = coolPlacesHistory.length - 1;
-    updateCoolPlaces();updateCoolNavigation();play_sound("click.mp3");
+    updateCoolPlaces();updateCoolNavigation();sound("click.mp3");
 }
-function prevCoolSet() {if (currentCoolIndex > 0) {currentCoolIndex--;updateCoolPlaces();updateCoolNavigation();}play_sound("click.mp3");}
+function prevCoolSet() {if (currentCoolIndex > 0) {currentCoolIndex--;updateCoolPlaces();updateCoolNavigation();}sound("click.mp3");}
 function updateCoolNavigation() {const prevBtn = document.getElementById('prevCoolBtn');const nextBtn = document.getElementById('nextCoolBtn');prevBtn.disabled = currentCoolIndex <= 0;nextBtn.disabled = false;}
 // --------------------------------------------------------------------------------
 
@@ -365,7 +365,7 @@ function handleFileSelect(event) {
             localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
             renderPlaces();alert(`Success import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
         } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck file format`);}
-    };reader.readAsText(file);play_sound("victory.mp3");startConfetti();
+    };reader.readAsText(file);sound("victory.mp3");startConfetti();
 }
 
 // MUSIC PLAYER --------------------------------------------------------------------------------
@@ -409,9 +409,9 @@ const progressBar=document.getElementById('progress-bar');const errorMsg = docum
 let currentTrackIndex=0;let isPlaying=false;
 function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
 function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}currentTrackIndex = Math.floor(Math.random() * tracks.length);const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();}
-function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;play_sound("click.mp3");}
-function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
-function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}play_sound("click.mp3");}
+function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;sound("click.mp3");}
+function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
+function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 // --------------------------------------------------------------------------------
 
 
@@ -420,7 +420,7 @@ function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length
 function deletePlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
     if (index < 0 || index >= savedPlaces.length) {console.error('Invalid index:', index);return;}if (!confirm(`Delete "${savedPlaces[index].name}"?`)) return; 
-    savedPlaces.splice(index, 1);localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("collide.mp3");
+    savedPlaces.splice(index, 1);localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();sound("collide.mp3");
 }
 function startEditPlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const place = savedPlaces[index];
@@ -438,7 +438,7 @@ function startEditPlace(index) {
             <button onclick="saveEditedPlace(${index})">Save</button>
             <button onclick="renderPlaces()">Cancel</button>
         </div>
-    `;play_sound("bass.mp3");
+    `;sound("bass.mp3");
 }
 function saveEditedPlace(index) {
     const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];const nameInput = document.getElementById(`edit-name-${index}`);
@@ -450,7 +450,7 @@ function saveEditedPlace(index) {
     place.name=newName;place.url=newUrl;
     place.category=storeCategory;place.id=extractPlaceId(newUrl) || place.id;
     place.normalizedUrl=normalizeRobloxUrl(newUrl);
-    localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();play_sound("splat.mp3");
+    localStorage.setItem('places', JSON.stringify(savedPlaces));renderPlaces();sound("splat.mp3");
 }
 // --------------------------------------------------------------------------------
 
@@ -477,8 +477,8 @@ function loadDefaultList() {
                     };savedPlaces.push(completePlace);imported++;
                 }
             });localStorage.setItem('places', JSON.stringify(savedPlaces));
-            renderPlaces();nextCoolSet();alert(`Successfully imported: ${imported}\nDuplicates skipped: ${duplicates}\nInvalid entries: ${invalid}`);play_sound("victory.mp3");
-        }).catch(error => {alert(`Error loading default list: ${error.message}\nMake sure Fav-List.json is in the same directory`);console.error("Load error:", error);play_sound("ouch.mp3");});
+            renderPlaces();nextCoolSet();alert(`Successfully imported: ${imported}\nDuplicates skipped: ${duplicates}\nInvalid entries: ${invalid}`);sound("victory.mp3");
+        }).catch(error => {alert(`Error loading default list: ${error.message}\nMake sure Fav-List.json is in the same directory`);console.error("Load error:", error);sound("ouch.mp3");});
 }
 
 
