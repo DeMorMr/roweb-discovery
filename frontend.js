@@ -453,14 +453,25 @@ let isPlaying = false;
 let shuffledTracks = [];
 let errorTimeout = null;
 
+function encodeTrackUrl(path) {
+
+    const parts = path.split('/');
+    const fileName = parts.pop();
+
+    const encodedFileName = encodeURIComponent(fileName).replace(/%20/g, ' ');
+
+    return parts.join('/') + '/' + encodedFileName;
+}
+
+
 function showError(message, duration = 3000) {
     errorMsg.textContent = message;
     console.error("Music Player Error:", message);
-
+    
     if (errorTimeout) {
         clearTimeout(errorTimeout);
     }
-
+    
     errorTimeout = setTimeout(() => {
         errorMsg.textContent = '';
         console.log("Error message cleared automatically");
@@ -498,11 +509,16 @@ function loadTrack(index) {
     
     currentTrackIndex = index;
     const trackPath = shuffledTracks[currentTrackIndex];
+    
+
+    const encodedTrackPath = encodeTrackUrl(trackPath);
+    
     audioPlayer.pause();
-    audioPlayer.src = trackPath;
+    audioPlayer.src = encodedTrackPath;
     trackName.textContent = decodeFileName(trackPath);
     progressBar.style.width = '0%';
     
+
     errorMsg.textContent = '';
     if (errorTimeout) {
         clearTimeout(errorTimeout);
@@ -513,6 +529,7 @@ function loadTrack(index) {
         audioPlayer.play().catch(error => {
             showError("Loading error: " + error.message);
             console.error("Loading error", error);
+            console.error("Failed URL:", encodedTrackPath);
             isPlaying = false;
             playBtn.textContent = "▶";
         });
@@ -685,5 +702,3 @@ window.onload = function() {
     initializePlayer();
     document.querySelector('.progress').addEventListener('click',(e) => {if (!audioPlayer.duration) return;const progressWidth=e.currentTarget.clientWidth;const clickPosition=e.offsetX;audioPlayer.currentTime=(clickPosition / progressWidth) * audioPlayer.duration;});
 };
-
-
