@@ -553,7 +553,7 @@ function togglePlay() {
         showError("No tracks available");
         return;
     }
-    
+     
     if (isPlaying) {
         audioPlayer.pause();
         playBtn.textContent = "▶";
