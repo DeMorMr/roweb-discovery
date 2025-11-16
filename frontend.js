@@ -426,7 +426,12 @@ const trackFiles = {
         "evilbell_imsosha.mp3"
     ]
 };
-const tracks = [];for (const [category, files] of Object.entries(trackFiles)) {files.forEach(file => {tracks.push(audioBasePaths[category] + file);});}
+const tracks = [];
+for (const [category, files] of Object.entries(trackFiles)) {
+    files.forEach(file => {
+        tracks.push(audioBasePaths[category] + file);
+    });
+}
 /*   -------- OLD VERSION --------
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
@@ -453,13 +458,12 @@ let isPlaying = false;
 let shuffledTracks = [];
 let errorTimeout = null;
 
-function encodeTrackUrl(path) {
 
+function encodeTrackUrl(path) {
     const parts = path.split('/');
     const fileName = parts.pop();
 
-    const encodedFileName = encodeURIComponent(fileName).replace(/%20/g, ' ');
-
+    const encodedFileName = encodeURIComponent(fileName);
     return parts.join('/') + '/' + encodedFileName;
 }
 
@@ -493,11 +497,17 @@ function initializePlayer() {
     audioPlayer.crossOrigin = "anonymous";
     audioPlayer.addEventListener('timeupdate', updateProgress);
     audioPlayer.addEventListener('ended', nextTrack);
+    audioPlayer.addEventListener('error', handleAudioError);
     playBtn.addEventListener('click', togglePlay);
     prevBtn.addEventListener('click', prevTrack);
     nextBtn.addEventListener('click', nextTrack);
     volumeSlider.addEventListener('input', setVolume);
     audioPlayer.addEventListener('canplaythrough', preloadNextTrack);
+}
+
+function handleAudioError(e) {
+    console.error("Audio element error:", audioPlayer.error);
+    showError("Audio error: " + (audioPlayer.error?.message || "Unknown error"));
 }
 
 function decodeFileName(encoded) {
@@ -524,6 +534,8 @@ function loadTrack(index) {
         clearTimeout(errorTimeout);
         errorTimeout = null;
     }
+    
+    console.log("Loading track:", encodedTrackPath);
     
     if (isPlaying) {
         audioPlayer.play().catch(error => {
@@ -554,6 +566,11 @@ function togglePlay() {
         }).catch(error => {
             showError("Playing error: " + error.message);
             console.error("Playing error", error);
+            console.error("Current track URL:", audioPlayer.src);
+            
+            setTimeout(() => {
+                nextTrack();
+            }, 1000);
         });
     }
     isPlaying = !isPlaying;
