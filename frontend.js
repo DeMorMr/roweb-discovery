@@ -402,6 +402,7 @@ const tracks = [
     "data/main/cr/11.%20print-hello-world_@warble_humanoid.mp3",
     "data/main/cr/evilbell_imsosha.mp3",
 ];
+/*   -------- OLD VERSION --------
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
 const volumeSlider=document.getElementById('volume-slider');const trackName = document.getElementById('track-name');
@@ -412,6 +413,46 @@ function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No
 function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;sound("click.mp3");}
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
+*/
+
+const audioPlayer = new Audio();
+const playBtn = document.getElementById('play-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const volumeSlider = document.getElementById('volume-slider');
+const trackName = document.getElementById('track-name');
+const progressBar = document.getElementById('progress-bar');
+const errorMsg = document.getElementById('error-message');
+
+let currentTrackIndex = 0;
+let isPlaying = false;
+let shuffledTracks = [];
+
+function shuffleTracks() {shuffledTracks = [...tracks];for (let i = shuffledTracks.length - 1; i > 0; i--) {const j = Math.floor(Math.random() * (i + 1));[shuffledTracks[i], shuffledTracks[j]] = [shuffledTracks[j], shuffledTracks[i]];}}
+function initializePlayer() {
+    shuffleTracks();loadTrack(0);
+    audioPlayer.preload = "metadata";audioPlayer.crossOrigin = "anonymous";
+    audioPlayer.addEventListener('timeupdate', updateProgress);audioPlayer.addEventListener('ended', nextTrack);
+    playBtn.addEventListener('click', togglePlay);prevBtn.addEventListener('click', prevTrack);nextBtn.addEventListener('click', nextTrack);
+    volumeSlider.addEventListener('input', setVolume);audioPlayer.addEventListener('canplaythrough', preloadNextTrack);
+}
+function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
+function loadTrack(index) {if (index < 0 || index >= shuffledTracks.length) return;currentTrackIndex = index;const trackPath = shuffledTracks[currentTrackIndex];audioPlayer.pause();audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';errorMsg.textContent = '';if (isPlaying) {audioPlayer.play().catch(error => {errorMsg.textContent = "Loading error: " + error.message;console.error("Loading error", error);isPlaying = false;playBtn.textContent = "▶";});}}
+function togglePlay() {
+    if (shuffledTracks.length === 0) {errorMsg.textContent = "No tracks available";return;}
+    if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";
+    } else {
+        if (!audioPlayer.src) {loadTrack(currentTrackIndex);}audioPlayer.play().then(() => {playBtn.textContent = "⏸";
+        }).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});
+    }isPlaying = !isPlaying;sound("click.mp3");
+}
+function nextTrack() {const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;loadTrack(nextIndex);sound("click.mp3");}
+function prevTrack() {const prevIndex = (currentTrackIndex - 1 + shuffledTracks.length) % shuffledTracks.length;loadTrack(prevIndex);sound("click.mp3");}
+function setVolume() {audioPlayer.volume = volumeSlider.value;}
+function updateProgress() {if (audioPlayer.duration) {const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;progressBar.style.width = progress + '%';}}
+function preloadNextTrack() {const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;const nextTrack = new Audio();nextTrack.preload = "metadata";nextTrack.src = shuffledTracks[nextIndex];}
+progressBar.parentElement.addEventListener('click', (e) => {if (!audioPlayer.duration) return;const rect = progressBar.parentElement.getBoundingClientRect();const percent = (e.clientX - rect.left) / rect.width;audioPlayer.currentTime = percent * audioPlayer.duration;});
+
 // --------------------------------------------------------------------------------
 
 
@@ -501,15 +542,19 @@ const randombackgroundinterval = setInterval(function() {setRandomBackground();}
 const randombannerinterval = setInterval(function() {setRandomBanner();},60000)
 
 window.onload = function() {
-    setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();loadRandomTrack();
+    setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
+    //loadRandomTrack();
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
+    /*
     playBtn.addEventListener('click', togglePlay);nextBtn.addEventListener('click', nextTrack);prevBtn.addEventListener('click', prevTrack);
     volumeSlider.addEventListener('input', () => {audioPlayer.volume = volumeSlider.value;});
     audioPlayer.addEventListener('timeupdate', () => {if (!audioPlayer.duration) return;const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;progressBar.style.width = `${progress}%`;});
     audioPlayer.addEventListener('ended', nextTrack);
     audioPlayer.addEventListener('error', () => {errorMsg.textContent = `Error loading: ${audioPlayer.error ? audioPlayer.error.message : 'Unknown error'}`;setTimeout(nextTrack, 2000);});
+    */
+    initializePlayer();
     document.querySelector('.progress').addEventListener('click',(e) => {if (!audioPlayer.duration) return;const progressWidth=e.currentTarget.clientWidth;const clickPosition=e.offsetX;audioPlayer.currentTime=(clickPosition / progressWidth) * audioPlayer.duration;});
 };
 
