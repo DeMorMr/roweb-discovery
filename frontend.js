@@ -421,7 +421,13 @@ const tracks = [
 
 ];
 const audioPlayer = new Audio();let currentTrackIndex = 0;let isPlaying = false;
-function loadTrack() {audioPlayer.src = tracks[currentTrackIndex];document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');document.getElementById('progress-bar').style.width = '0%';}
+// function loadTrack() {audioPlayer.src = tracks[currentTrackIndex];document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');document.getElementById('progress-bar').style.width = '0%';}
+function loadTrack() {
+    const encodedTrack = encodeURI(tracks[currentTrackIndex]);
+    audioPlayer.src = encodedTrack;
+    document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');
+    document.getElementById('progress-bar').style.width = '0%';
+}
 document.querySelector('.progress').addEventListener('click', (e) => {if (!audioPlayer.duration) return;const rect = e.currentTarget.getBoundingClientRect();const percent = (e.clientX - rect.left) / rect.width;audioPlayer.currentTime = percent * audioPlayer.duration;document.getElementById('progress-bar').style.width = `${percent * 100}%`;});
 document.getElementById('play-btn').addEventListener('click', () => {if (!audioPlayer.src) loadTrack();if (isPlaying) {audioPlayer.pause();document.getElementById('play-btn').textContent = "▶";} else {audioPlayer.play().then(() => {document.getElementById('play-btn').textContent = "⏸";}).catch(e => {document.getElementById('error-message').textContent = "Play error: " + e.message;});}isPlaying = !isPlaying;});
 document.getElementById('next-btn').addEventListener('click', () => {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadTrack();if (isPlaying) audioPlayer.play();sound("click.mp3");});
