@@ -521,15 +521,17 @@ function handleCanPlay() {
 }
 
 function handleAudioError(e) {
-    console.error("Audio element error:", audioPlayer.error);
+    console.error("Audio error:", audioPlayer.error);
     console.error("Failed URL:", audioPlayer.src);
-    showError("Audio error: " + (audioPlayer.error?.message || "Unknown"));
-    
+    showError("Cannot play: " + decodeFileName(audioPlayer.src));
 
     setTimeout(() => {
-        nextTrack();
+        if (shuffledTracks.length > 1) {
+            nextTrack();
+        }
     }, 2000);
 }
+
 
 function decodeFileName(encoded) {
     try {
@@ -644,7 +646,7 @@ progressBar.parentElement.addEventListener('click', (e) => {
     audioPlayer.currentTime = percent * audioPlayer.duration;
 });
 
-
+initializePlayer();
 // --------------------------------------------------------------------------------
 
 
