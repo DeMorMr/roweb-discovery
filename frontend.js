@@ -372,7 +372,7 @@ const songs = {
     "29. Roblox Soundtrack - Explore ROBLOX.mp3",
     "28. Roblox Soundtrack - Online Social Hangout.mp3",
     "23. Roblox Soundtrack - Tycoon Game.mp3",
-    "19. Roblox Soundtrack - Santa's Winter Strongholder.mp3",
+    "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
     "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
     "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
     "16. Roblox Soundtrack - Heli Wars.mp3",
