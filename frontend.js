@@ -583,7 +583,7 @@ const randombackgroundinterval = setInterval(function() {setRandomBackground();}
 const randombannerinterval = setInterval(function() {setRandomBanner();},60000)
 
 window.onload = function() {
-    setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
+    loadTrack();setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
