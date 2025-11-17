@@ -429,7 +429,7 @@ document.getElementById('prev-btn').addEventListener('click', () => {currentTrac
 document.getElementById('volume-slider').addEventListener('input', (e) => {audioPlayer.volume = e.target.value;});
 audioPlayer.addEventListener('timeupdate', () => {if (audioPlayer.duration) {const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;document.getElementById('progress-bar').style.width = `${progressPercent}%`;}});
 audioPlayer.addEventListener('ended', () => {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadTrack();if (isPlaying) audioPlayer.play();});
-
+audioPlayer.volume = 0.7;
 // --------------------------------------------------------------------------------
 
 
@@ -523,5 +523,5 @@ window.onload = function() {
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
-    document.querySelector('.progress').addEventListener('click',(e) => {if (!audioPlayer.duration) return;const progressWidth=e.currentTarget.clientWidth;const clickPosition=e.offsetX;audioPlayer.currentTime=(clickPosition / progressWidth) * audioPlayer.duration;});
+    loadTrack();
 };
