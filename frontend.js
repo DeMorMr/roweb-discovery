@@ -441,31 +441,8 @@ const trackFiles = {
     ]
 };
 
-const tracks = [];
-for (const [category, files] of Object.entries(trackFiles)) {
-    files.forEach(file => {
-        tracks.push(audioBasePaths[category] + file);
-    });
-}
 
-console.log("All tracks:", tracks);
-
-
-setTimeout(() => {
-    const audioTracks = tracks.filter(track => track.includes('/audio/'));
-    const crTracks = tracks.filter(track => track.includes('/cr/'));
-    console.log(`Audio tracks: ${audioTracks.length}, CR tracks: ${crTracks.length}`);
-    
-    audioTracks.slice(0, 3).forEach((track, i) => {
-        fetch(track, { method: 'HEAD' })
-            .then(response => {
-                console.log(`Audio track ${i}: ${response.ok ? 'FOUND' : 'MISSING'} - ${decodeFileName(track)}`);
-            })
-            .catch(() => {
-                console.log(`Audio track ${i}: FETCH ERROR - ${decodeFileName(track)}`);
-            });
-    });
-}, 1000);
+let availableTracks = [];
 
 const audioPlayer = new Audio();
 const playBtn = document.getElementById('play-btn');
@@ -475,6 +452,7 @@ const volumeSlider = document.getElementById('volume-slider');
 const trackName = document.getElementById('track-name');
 const progressBar = document.getElementById('progress-bar');
 const errorMsg = document.getElementById('error-message');
+const loadingIndicator = document.getElementById('loading-indicator');
 
 let currentTrackIndex = 0;
 let isPlaying = false;
@@ -482,7 +460,78 @@ let shuffledTracks = [];
 let errorTimeout = null;
 let userInteracted = false;
 
-function showError(message, duration = 3000) {
+
+async function checkTrackAvailability(trackPath) {
+    try {
+        const response = await fetch(trackPath, { method: 'HEAD' });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
+
+
+async function loadAvailableTracks() {
+    showLoading("Checking available tracks...");
+    
+    availableTracks = [];
+    
+    for (const [category, files] of Object.entries(trackFiles)) {
+        for (const file of files) {
+            const trackPath = audioBasePaths[category] + file;
+            
+    
+            console.log(`Checking: ${file}`);
+            
+            const isAvailable = await checkTrackAvailability(trackPath);
+            
+            if (isAvailable) {
+                availableTracks.push({
+                    path: trackPath,
+                    name: file.replace(/\.[^/.]+$/, ""),
+                    category: category
+                });
+                console.log(`✓ Available: ${file}`);
+            } else {
+                console.log(`✗ Missing: ${file}`);
+            }
+        }
+    }
+    
+    hideLoading();
+    
+    if (availableTracks.length === 0) {
+        showError("No audio tracks found on server");
+        console.error("No tracks available. Please check:");
+        console.error("1. File paths on server");
+        console.error("2. File names match exactly");
+        console.error("3. Files are uploaded to correct directories");
+        return false;
+    }
+    
+    console.log(`Found ${availableTracks.length} available tracks:`);
+    availableTracks.forEach(track => {
+        console.log(`- ${track.name} (${track.category})`);
+    });
+    
+    return true;
+}
+
+function showLoading(message) {
+    if (loadingIndicator) {
+        loadingIndicator.textContent = message;
+        loadingIndicator.style.display = 'block';
+    }
+    console.log(`Loading: ${message}`);
+}
+
+function hideLoading() {
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+    }
+}
+
+function showError(message, duration = 5000) {
     errorMsg.textContent = message;
     console.error("Music Player Error:", message);
     
@@ -492,26 +541,26 @@ function showError(message, duration = 3000) {
     
     errorTimeout = setTimeout(() => {
         errorMsg.textContent = '';
-        console.log("Error message cleared automatically");
     }, duration);
 }
 
 function shuffleTracks() {
-    shuffledTracks = [...tracks];
+    shuffledTracks = [...availableTracks];
     for (let i = shuffledTracks.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledTracks[i], shuffledTracks[j]] = [shuffledTracks[j], shuffledTracks[i]];
     }
 }
 
-function initializePlayer() {
-    if (tracks.length === 0) {
-        showError("No tracks available");
+async function initializePlayer() {
+    const tracksAvailable = await loadAvailableTracks();
+    
+    if (!tracksAvailable) {
         playBtn.disabled = true;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
         return;
     }
-    
-    console.log("Available tracks:", tracks);
     
     shuffleTracks();
     loadTrack(0);
@@ -531,6 +580,16 @@ function initializePlayer() {
     volumeSlider.addEventListener('input', setVolume);
     
     document.addEventListener('click', handleFirstInteraction, { once: true });
+    
+
+    updatePlayerStats();
+}
+
+function updatePlayerStats() {
+    const statsElement = document.getElementById('player-stats');
+    if (statsElement) {
+        statsElement.textContent = `${availableTracks.length} tracks available (${shuffledTracks.length} loaded)`;
+    }
 }
 
 function handleFirstInteraction() {
@@ -551,21 +610,21 @@ function handleAudioError(e) {
     console.error("Failed URL:", audioPlayer.src);
     
     const fileName = decodeFileName(audioPlayer.src);
-    showError(`File not found: ${fileName}`);
+    showError(`Playback error: ${fileName}`);
     
     setTimeout(() => {
         if (shuffledTracks.length > 1) {
-            console.log("Skipping to next track due to error");
+            console.log("Skipping problematic track");
             nextTrack();
         }
     }, 1000);
 }
 
-function decodeFileName(encoded) {
+function decodeFileName(url) {
     try {
-        return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");
+        return decodeURIComponent(url).split('/').pop().replace(/\.[^/.]+$/, "");
     } catch (e) {
-        return encoded.split('/').pop().replace(/\.[^/.]+$/, "");
+        return url.split('/').pop().replace(/\.[^/.]+$/, "");
     }
 }
 
@@ -573,11 +632,11 @@ function loadTrack(index) {
     if (index < 0 || index >= shuffledTracks.length) return;
     
     currentTrackIndex = index;
-    const trackPath = shuffledTracks[currentTrackIndex];
+    const track = shuffledTracks[currentTrackIndex];
     
     audioPlayer.pause();
-    audioPlayer.src = trackPath;
-    trackName.textContent = decodeFileName(trackPath);
+    audioPlayer.src = track.path;
+    trackName.textContent = track.name;
     progressBar.style.width = '0%';
     
     errorMsg.textContent = '';
@@ -586,9 +645,7 @@ function loadTrack(index) {
         errorTimeout = null;
     }
     
-    console.log("Loading track:", trackPath);
-    
-    preloadNextTrack();
+    console.log("Loading track:", track.path);
 }
 
 function togglePlay() {
@@ -667,14 +724,7 @@ function updateProgress() {
     }
 }
 
-function preloadNextTrack() {
-    if (shuffledTracks.length <= 1) return;
-    
-    const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;
-    const nextTrack = new Audio();
-    nextTrack.preload = "metadata";
-    nextTrack.src = shuffledTracks[nextIndex];
-}
+
 
 progressBar.parentElement.addEventListener('click', (e) => {
     if (!audioPlayer.duration || isNaN(audioPlayer.duration)) return;
@@ -683,6 +733,8 @@ progressBar.parentElement.addEventListener('click', (e) => {
     const percent = (e.clientX - rect.left) / rect.width;
     audioPlayer.currentTime = percent * audioPlayer.duration;
 });
+
+//document.addEventListener('DOMContentLoaded', initializePlayer);
 
 // --------------------------------------------------------------------------------
 
