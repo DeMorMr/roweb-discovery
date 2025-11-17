@@ -426,12 +426,7 @@ const trackFiles = {
         "evilbell_imsosha.mp3"
     ]
 };
-const tracks = [];
-for (const [category, files] of Object.entries(trackFiles)) {
-    files.forEach(file => {
-        tracks.push(audioBasePaths[category] + file);
-    });
-}
+
 /*   -------- OLD VERSION --------
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
@@ -444,6 +439,14 @@ function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) 
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 */
+const tracks = [];
+for (const [category, files] of Object.entries(trackFiles)) {
+    files.forEach(file => {
+        const encodedFile = encodeURIComponent(file);
+        tracks.push(audioBasePaths[category] + encodedFile);
+    });
+}
+
 const audioPlayer = new Audio();
 const playBtn = document.getElementById('play-btn');
 const prevBtn = document.getElementById('prev-btn');
@@ -457,15 +460,6 @@ let currentTrackIndex = 0;
 let isPlaying = false;
 let shuffledTracks = [];
 let errorTimeout = null;
-
-
-function encodeTrackUrl(path) {
-    const parts = path.split('/');
-    const fileName = parts.pop();
-
-    const encodedFileName = encodeURIComponent(fileName);
-    return parts.join('/') + '/' + encodedFileName;
-}
 
 
 function showError(message, duration = 3000) {
@@ -491,27 +485,57 @@ function shuffleTracks() {
 }
 
 function initializePlayer() {
+    if (tracks.length === 0) {
+        showError("No tracks available");
+        return;
+    }
+    
+    console.log("Available tracks:", tracks);
+    
     shuffleTracks();
     loadTrack(0);
-    audioPlayer.preload = "metadata";
+    
+
+    audioPlayer.preload = "auto";
     audioPlayer.crossOrigin = "anonymous";
+    
     audioPlayer.addEventListener('timeupdate', updateProgress);
     audioPlayer.addEventListener('ended', nextTrack);
     audioPlayer.addEventListener('error', handleAudioError);
+    audioPlayer.addEventListener('loadstart', handleLoadStart);
+    audioPlayer.addEventListener('canplay', handleCanPlay);
+    
     playBtn.addEventListener('click', togglePlay);
     prevBtn.addEventListener('click', prevTrack);
     nextBtn.addEventListener('click', nextTrack);
     volumeSlider.addEventListener('input', setVolume);
-    audioPlayer.addEventListener('canplaythrough', preloadNextTrack);
+}
+
+function handleLoadStart() {
+    console.log("Starting to load:", audioPlayer.src);
+}
+
+function handleCanPlay() {
+    console.log("Can play:", audioPlayer.src);
 }
 
 function handleAudioError(e) {
     console.error("Audio element error:", audioPlayer.error);
-    showError("Audio error: " + (audioPlayer.error?.message || "Unknown error"));
+    console.error("Failed URL:", audioPlayer.src);
+    showError("Audio error: " + (audioPlayer.error?.message || "Unknown"));
+    
+
+    setTimeout(() => {
+        nextTrack();
+    }, 2000);
 }
 
 function decodeFileName(encoded) {
-    return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");
+    try {
+        return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");
+    } catch (e) {
+        return encoded.split('/').pop().replace(/\.[^/.]+$/, "");
+    }
 }
 
 function loadTrack(index) {
@@ -520,11 +544,8 @@ function loadTrack(index) {
     currentTrackIndex = index;
     const trackPath = shuffledTracks[currentTrackIndex];
     
-
-    const encodedTrackPath = encodeTrackUrl(trackPath);
-    
     audioPlayer.pause();
-    audioPlayer.src = encodedTrackPath;
+    audioPlayer.src = trackPath;
     trackName.textContent = decodeFileName(trackPath);
     progressBar.style.width = '0%';
     
@@ -535,46 +556,16 @@ function loadTrack(index) {
         errorTimeout = null;
     }
     
-    console.log("Loading track:", encodedTrackPath);
+    console.log("Loading track:", trackPath);
     
     if (isPlaying) {
         audioPlayer.play().catch(error => {
-            showError("Loading error: " + error.message);
-            console.error("Loading error", error);
-            console.error("Failed URL:", encodedTrackPath);
+            showError("Play failed: " + decodeFileName(trackPath));
+            console.error("Play error:", error);
             isPlaying = false;
             playBtn.textContent = "▶";
         });
     }
-}
-
-function togglePlay() {
-    if (shuffledTracks.length === 0) {
-        showError("No tracks available");
-        return;
-    }
-     
-    if (isPlaying) {
-        audioPlayer.pause();
-        playBtn.textContent = "▶";
-    } else {
-        if (!audioPlayer.src) {
-            loadTrack(currentTrackIndex);
-        }
-        audioPlayer.play().then(() => {
-            playBtn.textContent = "⏸";
-        }).catch(error => {
-            showError("Playing error: " + error.message);
-            console.error("Playing error", error);
-            console.error("Current track URL:", audioPlayer.src);
-            
-            setTimeout(() => {
-                nextTrack();
-            }, 1000);
-        });
-    }
-    isPlaying = !isPlaying;
-    sound("click.mp3");
 }
 
 function nextTrack() {
