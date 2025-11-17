@@ -444,16 +444,18 @@ const trackFiles = {
 const tracks = [];
 for (const [category, files] of Object.entries(trackFiles)) {
     files.forEach(file => {
-        const encodedFile = encodeURIComponent(file);
-        tracks.push(audioBasePaths[category] + encodedFile);
+        tracks.push(audioBasePaths[category] + file);
     });
 }
 
 console.log("All tracks:", tracks);
+
+
 setTimeout(() => {
     const audioTracks = tracks.filter(track => track.includes('/audio/'));
     const crTracks = tracks.filter(track => track.includes('/cr/'));
     console.log(`Audio tracks: ${audioTracks.length}, CR tracks: ${crTracks.length}`);
+    
     audioTracks.slice(0, 3).forEach((track, i) => {
         fetch(track, { method: 'HEAD' })
             .then(response => {
@@ -528,7 +530,6 @@ function initializePlayer() {
     nextBtn.addEventListener('click', nextTrack);
     volumeSlider.addEventListener('input', setVolume);
     
-
     document.addEventListener('click', handleFirstInteraction, { once: true });
 }
 
@@ -552,7 +553,6 @@ function handleAudioError(e) {
     const fileName = decodeFileName(audioPlayer.src);
     showError(`File not found: ${fileName}`);
     
-
     setTimeout(() => {
         if (shuffledTracks.length > 1) {
             console.log("Skipping to next track due to error");
@@ -588,7 +588,6 @@ function loadTrack(index) {
     
     console.log("Loading track:", trackPath);
     
-
     preloadNextTrack();
 }
 
@@ -676,7 +675,6 @@ function preloadNextTrack() {
     nextTrack.preload = "metadata";
     nextTrack.src = shuffledTracks[nextIndex];
 }
-
 
 progressBar.parentElement.addEventListener('click', (e) => {
     if (!audioPlayer.duration || isNaN(audioPlayer.duration)) return;
