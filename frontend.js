@@ -346,148 +346,170 @@ function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) 
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 */
-const m_mp3 = "data/main/mp3/";
-const m_cr = "data/main/cr/";
-
-const trackCategories = {
-    mp3: [
-        "Michael Wyckoff - Keygen.mp3",
-        "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
-        "Positively Dark- Awakening.mp3",
-        "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
-        "old roblox dance｜Roblox.mp3",
-        "M.U.L.E Theme (ROBLOX music).mp3",
-        "Flight of the Bumblebee Roblox.mp3",
-        "Caramelldansen - Supergott - Roblox Music.mp3",
-        "Bossfight - Starship Showdown.mp3",
-        "Bossfight - Milky Ways.mp3",
-        "Bossfight - Leaving Leafwood Forest.mp3",
-        "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
-        "Bossfight - Commando Steve.mp3",
-        "Bossfight - Captain Cool.mp3",
-        "Better Off Alone - Glejs (Remix).mp3",
-        "30. Roblox Soundtrack - Party Music (2008).mp3",
-        "29. Roblox Soundtrack - Explore ROBLOX.mp3",
-        "28. Roblox Soundtrack - Online Social Hangout.mp3",
-        "23. Roblox Soundtrack - Tycoon Game.mp3",
-        "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
-        "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
-        "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
-        "16. Roblox Soundtrack - Heli Wars.mp3",
-        "13. Roblox Soundtrack - Contest Time!.mp3",
-        "11. Roblox Soundtrack - Clan Being Raided.mp3",
-        "09. Roblox Soundtrack - Crossroads Times.mp3",
-        "08. Roblox Soundtrack - Noob Alert.mp3",
-        "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
-        "06. Roblox Soundtrack - Metal Bricks.mp3",
-        "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
-        "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
-        "01. Roblox Soundtrack - The Main Theme.mp3",
-        "its-raining-tacos!.mp3",
-        "Toby Fox - A DARK ZONE.mp3"
-    ],
-    cr: [
-        "1. happy-pig_@warble_humanoid.mp3",
-        "2. lancer-waltz_penilipo.mp3",
-        "3. KEYGEN_penilipo.mp3",
-        "4. NEW-TRY_MostoThisStuff.wav",
-        "5. kqwke-Barrier.mp3",
-        "6. Penilipo x Maomi_penilipo.mp3",
-        "7. ExitedParty_penilipo.wav",
-        "8. 8BITAMBIENT_penilipo.wav",
-        "9. EarthboundSoundsOnly_penilipo.wav",
-        "10. SEATURTLE_penilipo.mp3",
-        "11. print-hello-world_@warble_humanoid.mp3",
-        "evilbell_imsosha.mp3"
-    ]
+const paths = {
+  mp3: "data/main/mp3/",
+  cr: "data/main/cr/"
 };
 
+const songs = {
+  mp3: [
+    "Michael Wyckoff - Keygen.mp3",
+    "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
+    "Positively Dark- Awakening.mp3",
+    "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
+    "old roblox dance｜Roblox.mp3",
+    "M.U.L.E Theme (ROBLOX music).mp3",
+    "Flight of the Bumblebee Roblox.mp3",
+    "Caramelldansen - Supergott - Roblox Music.mp3",
+    "Bossfight - Starship Showdown.mp3",
+    "Bossfight - Milky Ways.mp3",
+    "Bossfight - Leaving Leafwood Forest.mp3",
+    "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
+    "Bossfight - Commando Steve.mp3",
+    "Bossfight - Captain Cool.mp3",
+    "Better Off Alone - Glejs (Remix).mp3",
+    "30. Roblox Soundtrack - Party Music (2008).mp3",
+    "29. Roblox Soundtrack - Explore ROBLOX.mp3",
+    "28. Roblox Soundtrack - Online Social Hangout.mp3",
+    "23. Roblox Soundtrack - Tycoon Game.mp3",
+    "19. Roblox Soundtrack - Santa's Winter Strongholder.mp3",
+    "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
+    "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
+    "16. Roblox Soundtrack - Heli Wars.mp3",
+    "13. Roblox Soundtrack - Contest Time!.mp3",
+    "11. Roblox Soundtrack - Clan Being Raided.mp3",
+    "09. Roblox Soundtrack - Crossroads Times.mp3",
+    "08. Roblox Soundtrack - Noob Alert.mp3",
+    "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
+    "06. Roblox Soundtrack - Metal Bricks.mp3",
+    "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
+    "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
+    "01. Roblox Soundtrack - The Main Theme.mp3",
+    "its-raining-tacos!.mp3",
+    "Toby Fox - A DARK ZONE.mp3"
+  ],
+  cr: [
+    "1. happy-pig_@warble_humanoid.mp3",
+    "2. lancer-waltz_penilipo.mp3",
+    "3. KEYGEN_penilipo.mp3",
+    "4. NEW-TRY_MostoThisStuff.wav",
+    "5. kqwke-Barrier.mp3",
+    "6. Penilipo x Maomi_penilipo.mp3",
+    "7. ExitedParty_penilipo.wav",
+    "8. 8BITAMBIENT_penilipo.wav",
+    "9. EarthboundSoundsOnly_penilipo.wav",
+    "10. SEATURTLE_penilipo.mp3",
+    "11. print-hello-world_@warble_humanoid.mp3",
+    "evilbell_imsosha.mp3"
+  ]
+};
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+function mixTracks(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
-
-function createShuffledTracks() {
-    const allTracks = [
-        ...trackCategories.mp3.map(file => m_mp3 + file),
-        ...trackCategories.cr.map(file => m_cr + file)
-    ];
-    return shuffleArray(allTracks);
+function makePlaylist() {
+  const allTracks = [
+    ...songs.mp3.map(file => paths.mp3 + file),
+    ...songs.cr.map(file => paths.cr + file)
+  ];
+  return mixTracks(allTracks);
 }
 
-const shuffledTracks = createShuffledTracks();
+const playlist = makePlaylist();
 
 const audioPlayer = new Audio();
 let currentTrackIndex = 0;
 let isPlaying = false;
+let userInteracted = false;
 
 function loadTrack() {
-    const encodedTrack = encodeURI(shuffledTracks[currentTrackIndex]);
-    audioPlayer.src = encodedTrack;
-    document.getElementById('track-name').textContent = shuffledTracks[currentTrackIndex].split('/').pop().replace('.mp3', '');
-    document.getElementById('progress-bar').style.width = '0%';
+  const encodedTrack = encodeURI(playlist[currentTrackIndex]);
+  audioPlayer.src = encodedTrack;
+  document.getElementById('track-name').textContent = playlist[currentTrackIndex].split('/').pop().replace(/\.(mp3|wav)$/, '');
+  document.getElementById('progress-bar').style.width = '0%';
+}
+
+function safePlay() {
+  if (!userInteracted) return false;
+  
+  return audioPlayer.play().then(() => {
+    document.getElementById('play-btn').textContent = "⏸";
+    isPlaying = true;
+    return true;
+  }).catch(e => {
+    document.getElementById('error-message').textContent = "Playback error: " + e.message;
+    document.getElementById('play-btn').textContent = "▶";
+    isPlaying = false;
+    return false;
+  });
 }
 
 document.querySelector('.progress').addEventListener('click', (e) => {
-    if (!audioPlayer.duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    audioPlayer.currentTime = percent * audioPlayer.duration;
-    document.getElementById('progress-bar').style.width = `${percent * 100}%`;
+  if (!audioPlayer.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  audioPlayer.currentTime = percent * audioPlayer.duration;
+  document.getElementById('progress-bar').style.width = `${percent * 100}%`;
 });
 
 document.getElementById('play-btn').addEventListener('click', () => {
-    if (!audioPlayer.src) loadTrack();
-    if (isPlaying) {
-        audioPlayer.pause();
-        document.getElementById('play-btn').textContent = "▶";
-    } else {
-        audioPlayer.play().then(() => {
-            document.getElementById('play-btn').textContent = "⏸";
-        }).catch(e => {
-            document.getElementById('error-message').textContent = "Play error: " + e.message;
-        });
-    }
-    isPlaying = !isPlaying;
+  userInteracted = true;
+  
+  if (!audioPlayer.src) loadTrack();
+  if (isPlaying) {
+    audioPlayer.pause();
+    document.getElementById('play-btn').textContent = "▶";
+    isPlaying = false;
+  } else {
+    safePlay();
+  }
 });
 
 document.getElementById('next-btn').addEventListener('click', () => {
-    currentTrackIndex = (currentTrackIndex + 1) % shuffledTracks.length;
-    loadTrack();
-    if (isPlaying) audioPlayer.play();
-    sound("click.mp3");
+  userInteracted = true;
+  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  loadTrack();
+  if (isPlaying) safePlay();
+  sound("click.mp3");
 });
 
 document.getElementById('prev-btn').addEventListener('click', () => {
-    currentTrackIndex = (currentTrackIndex - 1 + shuffledTracks.length) % shuffledTracks.length;
-    loadTrack();
-    if (isPlaying) audioPlayer.play();
-    sound("click.mp3");
+  userInteracted = true;
+  currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+  loadTrack();
+  if (isPlaying) safePlay();
+  sound("click.mp3");
 });
 
 document.getElementById('volume-slider').addEventListener('input', (e) => {
-    audioPlayer.volume = e.target.value;
+  audioPlayer.volume = e.target.value;
 });
 
 audioPlayer.addEventListener('timeupdate', () => {
-    if (audioPlayer.duration) {
-        const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-        document.getElementById('progress-bar').style.width = `${progressPercent}%`;
-    }
+  if (audioPlayer.duration) {
+    const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+  }
 });
 
 audioPlayer.addEventListener('ended', () => {
-    currentTrackIndex = (currentTrackIndex + 1) % shuffledTracks.length;
-    loadTrack();
-    if (isPlaying) audioPlayer.play();
+  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  loadTrack();
+  if (isPlaying) safePlay();
 });
 
+
 audioPlayer.volume = 0.7;
+
+
+document.addEventListener('click', () => {
+  userInteracted = true;
+}, { once: true });
 // --------------------------------------------------------------------------------
 
 
