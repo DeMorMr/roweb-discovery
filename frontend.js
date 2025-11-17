@@ -444,10 +444,26 @@ const trackFiles = {
 const tracks = [];
 for (const [category, files] of Object.entries(trackFiles)) {
     files.forEach(file => {
-        const encodedFile = encodeURI(file).replace(/'/g, "%27");
+        const encodedFile = encodeURIComponent(file);
         tracks.push(audioBasePaths[category] + encodedFile);
     });
 }
+
+console.log("All tracks:", tracks);
+setTimeout(() => {
+    const audioTracks = tracks.filter(track => track.includes('/audio/'));
+    const crTracks = tracks.filter(track => track.includes('/cr/'));
+    console.log(`Audio tracks: ${audioTracks.length}, CR tracks: ${crTracks.length}`);
+    audioTracks.slice(0, 3).forEach((track, i) => {
+        fetch(track, { method: 'HEAD' })
+            .then(response => {
+                console.log(`Audio track ${i}: ${response.ok ? 'FOUND' : 'MISSING'} - ${decodeFileName(track)}`);
+            })
+            .catch(() => {
+                console.log(`Audio track ${i}: FETCH ERROR - ${decodeFileName(track)}`);
+            });
+    });
+}, 1000);
 
 const audioPlayer = new Audio();
 const playBtn = document.getElementById('play-btn');
