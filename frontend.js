@@ -355,7 +355,7 @@ function handleFileSelect(event) {const file = event.target.files[0];if (!file) 
     };reader.readAsText(file);sound("victory.mp3");startConfetti();
 }
 
-// MUSIC PLAYER --------------------------------------------------------------------------------
+// MUSIC PLAYER ---------------------------------------------------------------------------------
 
 /*   -------- OLD VERSION --------
 const audioPlayer=new Audio();
@@ -368,7 +368,7 @@ function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No
 function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;sound("click.mp3");}
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
-*/
+*/ 
 const bUrl = window.location.hostname === 'localhost' 
     ? '' 
     : 'https://demormr.github.io/roweb-discovery/';
