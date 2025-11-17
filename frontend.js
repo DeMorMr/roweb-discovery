@@ -390,15 +390,15 @@ const songs = {
   ],
   cr: [
     "1. happy-pig_@warble_humanoid.mp3",
-    "2. lancer-waltz_penilipo.mp3",
-    "3. KEYGEN_penilipo.mp3",
+    "2. lancer-waltz_@penilipo.mp3",
+    "3. KEYGEN_@penilipo.mp3",
     "4. NEW-TRY_MostoThisStuff.wav",
     "5. kqwke-Barrier.mp3",
-    "6. Penilipo x Maomi_penilipo.mp3",
-    "7. ExitedParty_penilipo.wav",
-    "8. 8BITAMBIENT_penilipo.wav",
-    "9. EarthboundSoundsOnly_penilipo.wav",
-    "10. SEATURTLE_penilipo.mp3",
+    "6. Penilipo x Maomi_@penilipo.mp3",
+    "7. ExitedParty_@penilipo.wav",
+    "8. 8BITAMBIENT_@penilipo.wav",
+    "9. EarthboundSoundsOnly_@penilipo.wav",
+    "10. SEATURTLE_@penilipo.mp3",
     "11. print-hello-world_@warble_humanoid.mp3",
     "evilbell_imsosha.mp3"
   ]
