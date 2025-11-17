@@ -646,7 +646,6 @@ progressBar.parentElement.addEventListener('click', (e) => {
     audioPlayer.currentTime = percent * audioPlayer.duration;
 });
 
-initializePlayer();
 // --------------------------------------------------------------------------------
 
 
