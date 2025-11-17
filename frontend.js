@@ -1,7 +1,7 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
 //function sound(name) {var audio = new Audio();audio.src = 'data/main/sounds/' + name;audio.autoplay = true;return true;}
 
-function sound(name) {var audio = new Audio();if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/main/sounds/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/main/sounds/' + randomSound;}else {audio.src = 'data/main/sounds/' + name;}audio.autoplay = true;return true;}
+function sound(name) {var audio = new Audio();audio.volume = 0.3;if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/main/sfx/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/main/sfx/' + randomSound;}else {audio.src = 'data/main/sfx/' + name;}audio.autoplay = true;return true;}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;sound("click.mp3");}
 
@@ -334,35 +334,22 @@ function updateCoolNavigation() {const prevBtn = document.getElementById('prevCo
 // --------------------------------------------------------------------------------
 
 
-function handleFileSelect(event) {
-    const file = event.target.files[0];if (!file) return;const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const importedData = JSON.parse(e.target.result);let importedPlaces = [];let importedCategories = null;
+function handleFileSelect(event) {const file = event.target.files[0];if (!file) return;const reader = new FileReader();reader.onload = function(e) {
+        try {const importedData = JSON.parse(e.target.result);let importedPlaces = [];let importedCategories = null;
             if (importedData.places && importedData.categories) {importedPlaces = importedData.places;importedCategories = importedData.categories;
-            } else if (Array.isArray(importedData)) {importedPlaces = importedData;
-            } else {throw new Error("Invalid file format");}
+            } else if (Array.isArray(importedData)) {importedPlaces = importedData;} else {throw new Error("Invalid file format");}
             if (!Array.isArray(importedPlaces)) {alert("Error: no data");return;}const savedPlaces = JSON.parse(localStorage.getItem('places')) || [];
-            let duplicates = 0;let imported = 0;
-            if (importedCategories && importedCategories.length > 0) {
+            let duplicates = 0;let imported = 0;if (importedCategories && importedCategories.length > 0) {
                 const currentCategories = JSON.parse(localStorage.getItem('categories')) || ['All', 'None'];const newCategories = importedCategories.filter(cat => cat !== 'All' && cat !== 'None' && !currentCategories.includes(cat));
                 if (newCategories.length > 0) {categories = [...currentCategories, ...newCategories];localStorage.setItem('categories', JSON.stringify(categories));populateCategoryDropdowns();}
-            }
-            importedPlaces.forEach(place => {
-                if (!place.url || !place.name) {console.warn("Missed url or name:", place);return;}
-                const id = place.id || extractPlaceId(place.url);
-                const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
+            }importedPlaces.forEach(place => {if (!place.url || !place.name) {console.warn("Missed url or name:", place);return;}
+                const id = place.id || extractPlaceId(place.url);const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
                 const isDuplicate = savedPlaces.some(savedPlace => {return (id && savedPlace.id === id) || savedPlace.normalizedUrl === normalizedUrl || normalizeRobloxUrl(savedPlace.url) === normalizedUrl;});
-                if (isDuplicate) {duplicates++;
-                } else {
-                    let category = place.category || '';
-                    const completePlace = {
-                        id,name:place.name,url:place.url,category,normalizedUrl,
+                if (isDuplicate) {duplicates++;} else {let category = place.category || '';
+                    const completePlace = {id,name:place.name,url:place.url,category,normalizedUrl,
                         date:place.date || new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')
                     };savedPlaces.push(completePlace);imported++;
-                }
-            });
-            localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
+                }});localStorage.setItem('places', JSON.stringify(savedPlaces));currentPage = Math.floor(savedPlaces.length / itemsPerPage);
             renderPlaces();alert(`Success import: ${imported}\nDuplicates: ${duplicates}\nInvalid: ${importedPlaces.length - imported - duplicates}`);
         } catch (error) {console.error("Import Error:", error);alert(`Import Error: ${error.message}\nCheck file format`);}
     };reader.readAsText(file);sound("victory.mp3");startConfetti();
@@ -383,174 +370,65 @@ function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.lengt
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 */
 
-const audioBasePaths = {
-    audio: "data/main/audio/",
-    cr: "data/main/cr/"
-};
+const tracks = [
+        "data/main/audio/" + "Michael Wyckoff - Keygen.mp3",
+        "data/main/audio/" + "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
+        "data/main/audio/" + "Positively Dark- Awakening.mp3",
+        "data/main/audio/" + "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
+        "data/main/audio/" + "old roblox dance｜Roblox.mp3",
+        "data/main/audio/" + "M.U.L.E Theme (ROBLOX music).mp3",
+        "data/main/audio/" + "Flight of the Bumblebee Roblox.mp3",
+        "data/main/audio/" + "Caramelldansen - Supergott - Roblox Music.mp3",
+        "data/main/audio/" + "Bossfight - Starship Showdown.mp3",
+        "data/main/audio/" + "Bossfight - Milky Ways.mp3",
+        "data/main/audio/" + "Bossfight - Leaving Leafwood Forest.mp3",
+        "data/main/audio/" + "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
+        "data/main/audio/" + "Bossfight - Commando Steve.mp3",
+        "data/main/audio/" + "Bossfight - Captain Cool.mp3",
+        "data/main/audio/" + "Better Off Alone - Glejs (Remix).mp3",
+        "data/main/audio/" + "30. Roblox Soundtrack - Party Music (2008).mp3",
+        "data/main/audio/" + "29. Roblox Soundtrack - Explore ROBLOX.mp3",
+        "data/main/audio/" + "28. Roblox Soundtrack - Online Social Hangout.mp3",
+        "data/main/audio/" + "23. Roblox Soundtrack - Tycoon Game.mp3",
+        "data/main/audio/" + "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
+        "data/main/audio/" + "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
+        "data/main/audio/" + "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
+        "data/main/audio/" + "16. Roblox Soundtrack - Heli Wars.mp3",
+        "data/main/audio/" + "13. Roblox Soundtrack - Contest Time!.mp3",
+        "data/main/audio/" + "11. Roblox Soundtrack - Clan Being Raided.mp3",
+        "data/main/audio/" + "09. Roblox Soundtrack - Crossroads Times.mp3",
+        "data/main/audio/" + "08. Roblox Soundtrack - Noob Alert.mp3",
+        "data/main/audio/" + "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
+        "data/main/audio/" + "06. Roblox Soundtrack - Metal Bricks.mp3",
+        "data/main/audio/" + "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
+        "data/main/audio/" + "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
+        "data/main/audio/" + "01. Roblox Soundtrack - The Main Theme.mp3",
+        "data/main/audio/" + "its-raining-tacos!.mp3",
+        "data/main/audio/" + "Toby Fox - A DARK ZONE.mp3",
 
-const trackFiles = {
-    audio: [
-        "Michael Wyckoff - Keygen.mp3",
-        "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
-        "Positively Dark- Awakening.mp3",
-        "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
-        "old roblox dance｜Roblox.mp3",
-        "M.U.L.E Theme (ROBLOX music).mp3",
-        "Flight of the Bumblebee Roblox.mp3",
-        "Caramelldansen - Supergott - Roblox Music.mp3",
-        "Bossfight - Starship Showdown.mp3",
-        "Bossfight - Milky Ways.mp3",
-        "Bossfight - Leaving Leafwood Forest.mp3",
-        "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
-        "Bossfight - Commando Steve.mp3",
-        "Bossfight - Captain Cool.mp3",
-        "Better Off Alone - Glejs (Remix).mp3",
-        "30. Roblox Soundtrack - Party Music (2008).mp3",
-        "29. Roblox Soundtrack - Explore ROBLOX.mp3",
-        "28. Roblox Soundtrack - Online Social Hangout.mp3",
-        "23. Roblox Soundtrack - Tycoon Game.mp3",
-        "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
-        "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
-        "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
-        "16. Roblox Soundtrack - Heli Wars.mp3",
-        "13. Roblox Soundtrack - Contest Time!.mp3",
-        "11. Roblox Soundtrack - Clan Being Raided.mp3",
-        "09. Roblox Soundtrack - Crossroads Times.mp3",
-        "08. Roblox Soundtrack - Noob Alert.mp3",
-        "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
-        "06. Roblox Soundtrack - Metal Bricks.mp3",
-        "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
-        "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
-        "01. Roblox Soundtrack - The Main Theme.mp3",
-        "its-raining-tacos!.mp3",
-        "Toby Fox - A DARK ZONE.mp3"
-    ],
-    cr: [
-        "1. happy-pig_@warble_humanoid.mp3",
-        "2. lancer-waltz_penilipo.mp3",
-        "3. KEYGEN_penilipo.mp3",
-        "4. NEW-TRY_MostoThisStuff.wav",
-        "5. kqwke-Barrier.mp3",
-        "6. Penilipo x Maomi_penilipo.mp3",
-        "7. ExitedParty_penilipo.wav",
-        "8. 8BITAMBIENT_penilipo.wav",
-        "9. EarthboundSoundsOnly_penilipo.wav",
-        "10. SEATURTLE_penilipo.mp3",
-        "11. print-hello-world_@warble_humanoid.mp3",
-        "evilbell_imsosha.mp3"
-    ]
-};
+        "data/main/cr/" + "1. happy-pig_@warble_humanoid.mp3",
+        "data/main/cr/" + "2. lancer-waltz_penilipo.mp3",
+        "data/main/cr/" + "3. KEYGEN_penilipo.mp3",
+        "data/main/cr/" + "4. NEW-TRY_MostoThisStuff.wav",
+        "data/main/cr/" + "5. kqwke-Barrier.mp3",
+        "data/main/cr/" + "6. Penilipo x Maomi_penilipo.mp3",
+        "data/main/cr/" + "7. ExitedParty_penilipo.wav",
+        "data/main/cr/" + "8. 8BITAMBIENT_penilipo.wav",
+        "data/main/cr/" + "9. EarthboundSoundsOnly_penilipo.wav",
+        "data/main/cr/" + "10. SEATURTLE_penilipo.mp3",
+        "data/main/cr/" + "11. print-hello-world_@warble_humanoid.mp3",
+        "data/main/cr/" + "evilbell_imsosha.mp3"
 
-const tracks = [];
-for (const [category, files] of Object.entries(trackFiles)) {
-    files.forEach(file => {
-        tracks.push(audioBasePaths[category] + file);
-    });
-}
-
-// Audio Player Logic
-const audioPlayer = new Audio();
-const playBtn = document.getElementById('play-btn');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-const volumeSlider = document.getElementById('volume-slider');
-const trackName = document.getElementById('track-name');
-const progressBar = document.getElementById('progress-bar');
-const errorMsg = document.getElementById('error-message');
-
-let currentTrackIndex = 0;
-let isPlaying = false;
-
-function decodeFileName(encoded) {
-    return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");
-}
-
-function loadRandomTrack() {
-    if (tracks.length === 0) {
-        errorMsg.textContent = "No tracks found";
-        return;
-    }
-    currentTrackIndex = Math.floor(Math.random() * tracks.length);
-    const trackPath = tracks[currentTrackIndex];
-    audioPlayer.src = trackPath;
-    trackName.textContent = decodeFileName(trackPath);
-    progressBar.style.width = '0%';
-    audioPlayer.load();
-}
-
-function togglePlay() {
-    if (!audioPlayer.src) {
-        loadRandomTrack();
-    }
-    if (isPlaying) {
-        audioPlayer.pause();
-        playBtn.textContent = "▶";
-    } else {
-        audioPlayer.play().then(() => {
-            playBtn.textContent = "⏸";
-        }).catch(error => {
-            errorMsg.textContent = "Playing error: " + error.message;
-            console.error("Playing error", error);
-        });
-    }
-    isPlaying = !isPlaying;
-    sound("click.mp3");
-}
-
-function nextTrack() {
-    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-    const trackPath = tracks[currentTrackIndex];
-    audioPlayer.src = trackPath;
-    trackName.textContent = decodeFileName(trackPath);
-    progressBar.style.width = '0%';
-    audioPlayer.load();
-    if (isPlaying) {
-        audioPlayer.play().catch(e => {
-            errorMsg.textContent = "AutoPlay error: " + e.message;
-        });
-    }
-    sound("click.mp3");
-}
-
-function prevTrack() {
-    currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-    const trackPath = tracks[currentTrackIndex];
-    audioPlayer.src = trackPath;
-    trackName.textContent = decodeFileName(trackPath);
-    progressBar.style.width = '0%';
-    audioPlayer.load();
-    if (isPlaying) {
-        audioPlayer.play().catch(e => {
-            errorMsg.textContent = "AutoPlay error: " + e.message;
-        });
-    }
-    sound("click.mp3");
-}
-
-// Event Listeners
-playBtn.addEventListener('click', togglePlay);
-nextBtn.addEventListener('click', nextTrack);
-prevBtn.addEventListener('click', prevTrack);
-
-volumeSlider.addEventListener('input', () => {
-    audioPlayer.volume = volumeSlider.value;
-});
-
-audioPlayer.addEventListener('timeupdate', () => {
-    if (audioPlayer.duration) {
-        const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-        progressBar.style.width = `${progressPercent}%`;
-    }
-});
-
-audioPlayer.addEventListener('ended', nextTrack);
-
-// Initialize volume
-audioPlayer.volume = volumeSlider.value;
-
-
-
-
+];
+const audioPlayer = new Audio();let currentTrackIndex = 0;let isPlaying = false;
+function loadTrack() {audioPlayer.src = tracks[currentTrackIndex];document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');document.getElementById('progress-bar').style.width = '0%';}
+document.querySelector('.progress').addEventListener('click', (e) => {if (!audioPlayer.duration) return;const rect = e.currentTarget.getBoundingClientRect();const percent = (e.clientX - rect.left) / rect.width;audioPlayer.currentTime = percent * audioPlayer.duration;document.getElementById('progress-bar').style.width = `${percent * 100}%`;});
+document.getElementById('play-btn').addEventListener('click', () => {if (!audioPlayer.src) loadTrack();if (isPlaying) {audioPlayer.pause();document.getElementById('play-btn').textContent = "▶";} else {audioPlayer.play().then(() => {document.getElementById('play-btn').textContent = "⏸";}).catch(e => {document.getElementById('error-message').textContent = "Play error: " + e.message;});}isPlaying = !isPlaying;});
+document.getElementById('next-btn').addEventListener('click', () => {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadTrack();if (isPlaying) audioPlayer.play();sound("click.mp3");});
+document.getElementById('prev-btn').addEventListener('click', () => {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadTrack();if (isPlaying) audioPlayer.play();sound("click.mp3");});
+document.getElementById('volume-slider').addEventListener('input', (e) => {audioPlayer.volume = e.target.value;});
+audioPlayer.addEventListener('timeupdate', () => {if (audioPlayer.duration) {const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;document.getElementById('progress-bar').style.width = `${progressPercent}%`;}});
+audioPlayer.addEventListener('ended', () => {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadTrack();if (isPlaying) audioPlayer.play();});
 
 // --------------------------------------------------------------------------------
 
@@ -642,17 +520,8 @@ const randombannerinterval = setInterval(function() {setRandomBanner();},60000)
 
 window.onload = function() {
     setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
-    //loadRandomTrack();
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
-    /*
-    playBtn.addEventListener('click', togglePlay);nextBtn.addEventListener('click', nextTrack);prevBtn.addEventListener('click', prevTrack);
-    volumeSlider.addEventListener('input', () => {audioPlayer.volume = volumeSlider.value;});
-    audioPlayer.addEventListener('timeupdate', () => {if (!audioPlayer.duration) return;const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;progressBar.style.width = `${progress}%`;});
-    audioPlayer.addEventListener('ended', nextTrack);
-    audioPlayer.addEventListener('error', () => {errorMsg.textContent = `Error loading: ${audioPlayer.error ? audioPlayer.error.message : 'Unknown error'}`;setTimeout(nextTrack, 2000);});
-    */
-    initializePlayer();
     document.querySelector('.progress').addEventListener('click',(e) => {if (!audioPlayer.duration) return;const progressWidth=e.currentTarget.clientWidth;const clickPosition=e.offsetX;audioPlayer.currentTime=(clickPosition / progressWidth) * audioPlayer.duration;});
 };
