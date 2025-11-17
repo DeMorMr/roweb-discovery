@@ -369,9 +369,12 @@ function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) 
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 */ 
+/*
 const bUrl = window.location.hostname === 'localhost' 
     ? '' 
     : 'https://demormr.github.io/roweb-discovery/';
+*/
+const bUrl = None
 const m_a = "data/main/audio/";const m_cr = "data/main/cr/";
 const tracks = [
         bUrl + m_a + "Michael Wyckoff - Keygen.mp3",
