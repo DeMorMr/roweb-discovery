@@ -370,7 +370,6 @@ function handleFileSelect(event) {
 
 // MUSIC PLAYER --------------------------------------------------------------------------------
 
-
 /*   -------- OLD VERSION --------
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
@@ -442,7 +441,6 @@ const trackFiles = {
     ]
 };
 
-
 const tracks = [];
 for (const [category, files] of Object.entries(trackFiles)) {
     files.forEach(file => {
@@ -450,6 +448,7 @@ for (const [category, files] of Object.entries(trackFiles)) {
     });
 }
 
+// Audio Player Logic
 const audioPlayer = new Audio();
 const playBtn = document.getElementById('play-btn');
 const prevBtn = document.getElementById('prev-btn');
@@ -461,156 +460,94 @@ const errorMsg = document.getElementById('error-message');
 
 let currentTrackIndex = 0;
 let isPlaying = false;
-let shuffledTracks = [];
-let userInteracted = false;
 
-
-function shuffleTracks() {
-    shuffledTracks = [...tracks];
-    for (let i = shuffledTracks.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledTracks[i], shuffledTracks[j]] = [shuffledTracks[j], shuffledTracks[i]];
-    }
+function decodeFileName(encoded) {
+    return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");
 }
 
-function loadTrack(index) {
-    if (index < 0 || index >= shuffledTracks.length) return;
-    
-    currentTrackIndex = index;
-    const trackPath = shuffledTracks[currentTrackIndex];
-    
-
-    audioPlayer.pause();
-    audioPlayer.src = '';
-    
-
+function loadRandomTrack() {
+    if (tracks.length === 0) {
+        errorMsg.textContent = "No tracks found";
+        return;
+    }
+    currentTrackIndex = Math.floor(Math.random() * tracks.length);
+    const trackPath = tracks[currentTrackIndex];
     audioPlayer.src = trackPath;
-    audioPlayer.preload = "auto"; 
-    audioPlayer.load();
-    
-    trackName.textContent = trackPath.split('/').pop().replace(/\.[^/.]+$/, "");
+    trackName.textContent = decodeFileName(trackPath);
     progressBar.style.width = '0%';
-    errorMsg.textContent = '';
-    
-    console.log("Loading track:", trackPath);
+    audioPlayer.load();
 }
 
 function togglePlay() {
-    if (shuffledTracks.length === 0) return;
-
-    userInteracted = true;
-    
+    if (!audioPlayer.src) {
+        loadRandomTrack();
+    }
     if (isPlaying) {
         audioPlayer.pause();
         playBtn.textContent = "▶";
-        isPlaying = false;
     } else {
-
-        if (!audioPlayer.src || audioPlayer.error) {
-            loadTrack(currentTrackIndex);
-        }
-        
         audioPlayer.play().then(() => {
             playBtn.textContent = "⏸";
-            isPlaying = true;
         }).catch(error => {
-            console.error("Play error:", error);
-            errorMsg.textContent = "Playback error";
-            isPlaying = false;
-            playBtn.textContent = "▶";
+            errorMsg.textContent = "Playing error: " + error.message;
+            console.error("Playing error", error);
         });
     }
+    isPlaying = !isPlaying;
     sound("click.mp3");
 }
 
 function nextTrack() {
-    if (shuffledTracks.length <= 1) return;
-    const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;
-    loadTrack(nextIndex);
-    
-    if (isPlaying && userInteracted) {
-        audioPlayer.play().catch(error => {
-            console.error("Auto-play failed:", error);
-            isPlaying = false;
-            playBtn.textContent = "▶";
+    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+    const trackPath = tracks[currentTrackIndex];
+    audioPlayer.src = trackPath;
+    trackName.textContent = decodeFileName(trackPath);
+    progressBar.style.width = '0%';
+    audioPlayer.load();
+    if (isPlaying) {
+        audioPlayer.play().catch(e => {
+            errorMsg.textContent = "AutoPlay error: " + e.message;
         });
     }
     sound("click.mp3");
 }
 
 function prevTrack() {
-    if (shuffledTracks.length <= 1) return;
-    const prevIndex = (currentTrackIndex - 1 + shuffledTracks.length) % shuffledTracks.length;
-    loadTrack(prevIndex);
-    
-    if (isPlaying && userInteracted) {
-        audioPlayer.play().catch(error => {
-            console.error("Auto-play failed:", error);
-            isPlaying = false;
-            playBtn.textContent = "▶";
+    currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+    const trackPath = tracks[currentTrackIndex];
+    audioPlayer.src = trackPath;
+    trackName.textContent = decodeFileName(trackPath);
+    progressBar.style.width = '0%';
+    audioPlayer.load();
+    if (isPlaying) {
+        audioPlayer.play().catch(e => {
+            errorMsg.textContent = "AutoPlay error: " + e.message;
         });
     }
     sound("click.mp3");
 }
 
+// Event Listeners
+playBtn.addEventListener('click', togglePlay);
+nextBtn.addEventListener('click', nextTrack);
+prevBtn.addEventListener('click', prevTrack);
 
-function initializePlayer() {
-    console.log("Initializing player with", tracks.length, "tracks");
-    
-    shuffleTracks();
-    loadTrack(0);
-    
-
+volumeSlider.addEventListener('input', () => {
     audioPlayer.volume = volumeSlider.value;
-    audioPlayer.preload = "auto";
-    
-   
-    audioPlayer.addEventListener('timeupdate', () => {
-        if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
-            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            progressBar.style.width = progress + '%';
-        }
-    });
-    
-    audioPlayer.addEventListener('ended', nextTrack);
-    
-    audioPlayer.addEventListener('error', (e) => {
-        console.error("Audio error:", audioPlayer.error, "for URL:", audioPlayer.src);
-        errorMsg.textContent = `Error loading: ${trackName.textContent}`;
-        
+});
 
-        setTimeout(() => {
-            if (shuffledTracks.length > 1) {
-                nextTrack();
-            }
-        }, 2000);
-    });
-    
+audioPlayer.addEventListener('timeupdate', () => {
+    if (audioPlayer.duration) {
+        const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+    }
+});
 
-    playBtn.addEventListener('click', togglePlay);
-    prevBtn.addEventListener('click', prevTrack);
-    nextBtn.addEventListener('click', nextTrack);
-    volumeSlider.addEventListener('input', () => {
-        audioPlayer.volume = volumeSlider.value;
-    });
-    
+audioPlayer.addEventListener('ended', nextTrack);
 
-    progressBar.parentElement.addEventListener('click', (e) => {
-        if (!audioPlayer.duration || isNaN(audioPlayer.duration)) return;
-        
-        const rect = progressBar.parentElement.getBoundingClientRect();
-        const percent = (e.clientX - rect.left) / rect.width;
-        audioPlayer.currentTime = percent * audioPlayer.duration;
-    });
-    
+// Initialize volume
+audioPlayer.volume = volumeSlider.value;
 
-    document.addEventListener('click', () => {
-        if (!userInteracted) {
-            userInteracted = true;
-            console.log("User interaction detected");
-        }
-    }, { once: true });
-}
 
 
 
