@@ -369,62 +369,64 @@ function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) 
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 */
-
+const BASE_URL = window.location.hostname === 'localhost' 
+    ? '' 
+    : 'https://demormr.github.io/roweb-discovery/';
+const m_a = "data/main/audio/";const m_cr = "data/main/cr/";
 const tracks = [
-        "data/main/audio/" + "Michael Wyckoff - Keygen.mp3",
-        "data/main/audio/" + "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
-        "data/main/audio/" + "Positively Dark- Awakening.mp3",
-        "data/main/audio/" + "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
-        "data/main/audio/" + "old roblox dance｜Roblox.mp3",
-        "data/main/audio/" + "M.U.L.E Theme (ROBLOX music).mp3",
-        "data/main/audio/" + "Flight of the Bumblebee Roblox.mp3",
-        "data/main/audio/" + "Caramelldansen - Supergott - Roblox Music.mp3",
-        "data/main/audio/" + "Bossfight - Starship Showdown.mp3",
-        "data/main/audio/" + "Bossfight - Milky Ways.mp3",
-        "data/main/audio/" + "Bossfight - Leaving Leafwood Forest.mp3",
-        "data/main/audio/" + "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
-        "data/main/audio/" + "Bossfight - Commando Steve.mp3",
-        "data/main/audio/" + "Bossfight - Captain Cool.mp3",
-        "data/main/audio/" + "Better Off Alone - Glejs (Remix).mp3",
-        "data/main/audio/" + "30. Roblox Soundtrack - Party Music (2008).mp3",
-        "data/main/audio/" + "29. Roblox Soundtrack - Explore ROBLOX.mp3",
-        "data/main/audio/" + "28. Roblox Soundtrack - Online Social Hangout.mp3",
-        "data/main/audio/" + "23. Roblox Soundtrack - Tycoon Game.mp3",
-        "data/main/audio/" + "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
-        "data/main/audio/" + "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
-        "data/main/audio/" + "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
-        "data/main/audio/" + "16. Roblox Soundtrack - Heli Wars.mp3",
-        "data/main/audio/" + "13. Roblox Soundtrack - Contest Time!.mp3",
-        "data/main/audio/" + "11. Roblox Soundtrack - Clan Being Raided.mp3",
-        "data/main/audio/" + "09. Roblox Soundtrack - Crossroads Times.mp3",
-        "data/main/audio/" + "08. Roblox Soundtrack - Noob Alert.mp3",
-        "data/main/audio/" + "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
-        "data/main/audio/" + "06. Roblox Soundtrack - Metal Bricks.mp3",
-        "data/main/audio/" + "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
-        "data/main/audio/" + "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
-        "data/main/audio/" + "01. Roblox Soundtrack - The Main Theme.mp3",
-        "data/main/audio/" + "its-raining-tacos!.mp3",
-        "data/main/audio/" + "Toby Fox - A DARK ZONE.mp3",
+        "${BASE_URL}" + "${m_a}" + "Michael Wyckoff - Keygen.mp3",
+        "${BASE_URL}" + "${m_a}" + "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
+        "${BASE_URL}" + "${m_a}" + "Positively Dark- Awakening.mp3",
+        "${BASE_URL}" + "${m_a}" + "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
+        "${BASE_URL}" + "${m_a}" + "old roblox dance｜Roblox.mp3",
+        "${BASE_URL}" + "${m_a}" + "M.U.L.E Theme (ROBLOX music).mp3",
+        "${BASE_URL}" + "${m_a}" + "Flight of the Bumblebee Roblox.mp3",
+        "${BASE_URL}" + "${m_a}" + "Caramelldansen - Supergott - Roblox Music.mp3",
+        "${BASE_URL}" + "${m_a}" + "Bossfight - Starship Showdown.mp3",
+        "${BASE_URL}" + "${m_a}" + "Bossfight - Milky Ways.mp3",
+        "${BASE_URL}" + "${m_a}" + "Bossfight - Leaving Leafwood Forest.mp3",
+        "${BASE_URL}" + "${m_a}" + "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
+        "${BASE_URL}" + "${m_a}" + "Bossfight - Commando Steve.mp3",
+        "${BASE_URL}" + "${m_a}" + "Bossfight - Captain Cool.mp3",
+        "${BASE_URL}" + "${m_a}" + "Better Off Alone - Glejs (Remix).mp3",
+        "${BASE_URL}" + "${m_a}" + "30. Roblox Soundtrack - Party Music (2008).mp3",
+        "${BASE_URL}" + "${m_a}" + "29. Roblox Soundtrack - Explore ROBLOX.mp3",
+        "${BASE_URL}" + "${m_a}" + "28. Roblox Soundtrack - Online Social Hangout.mp3",
+        "${BASE_URL}" + "${m_a}" + "23. Roblox Soundtrack - Tycoon Game.mp3",
+        "${BASE_URL}" + "${m_a}" + "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
+        "${BASE_URL}" + "${m_a}" + "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
+        "${BASE_URL}" + "${m_a}" + "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
+        "${BASE_URL}" + "${m_a}" + "16. Roblox Soundtrack - Heli Wars.mp3",
+        "${BASE_URL}" + "${m_a}" + "13. Roblox Soundtrack - Contest Time!.mp3",
+        "${BASE_URL}" + "${m_a}" + "11. Roblox Soundtrack - Clan Being Raided.mp3",
+        "${BASE_URL}" + "${m_a}" + "09. Roblox Soundtrack - Crossroads Times.mp3",
+        "${BASE_URL}" + "${m_a}" + "08. Roblox Soundtrack - Noob Alert.mp3",
+        "${BASE_URL}" + "${m_a}" + "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
+        "${BASE_URL}" + "${m_a}" + "06. Roblox Soundtrack - Metal Bricks.mp3",
+        "${BASE_URL}" + "${m_a}" + "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
+        "${BASE_URL}" + "${m_a}" + "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
+        "${BASE_URL}" + "${m_a}" + "01. Roblox Soundtrack - The Main Theme.mp3",
+        "${BASE_URL}" + "${m_a}" + "its-raining-tacos!.mp3",
+        "${BASE_URL}" + "${m_a}" + "Toby Fox - A DARK ZONE.mp3",
 
-        "data/main/cr/" + "1. happy-pig_@warble_humanoid.mp3",
-        "data/main/cr/" + "2. lancer-waltz_penilipo.mp3",
-        "data/main/cr/" + "3. KEYGEN_penilipo.mp3",
-        "data/main/cr/" + "4. NEW-TRY_MostoThisStuff.wav",
-        "data/main/cr/" + "5. kqwke-Barrier.mp3",
-        "data/main/cr/" + "6. Penilipo x Maomi_penilipo.mp3",
-        "data/main/cr/" + "7. ExitedParty_penilipo.wav",
-        "data/main/cr/" + "8. 8BITAMBIENT_penilipo.wav",
-        "data/main/cr/" + "9. EarthboundSoundsOnly_penilipo.wav",
-        "data/main/cr/" + "10. SEATURTLE_penilipo.mp3",
-        "data/main/cr/" + "11. print-hello-world_@warble_humanoid.mp3",
-        "data/main/cr/" + "evilbell_imsosha.mp3"
+        "${BASE_URL}" + "${m_cr}" + "1. happy-pig_@warble_humanoid.mp3",
+        "${BASE_URL}" + "${m_cr}" + "2. lancer-waltz_penilipo.mp3",
+        "${BASE_URL}" + "${m_cr}" + "3. KEYGEN_penilipo.mp3",
+        "${BASE_URL}" + "${m_cr}" + "4. NEW-TRY_MostoThisStuff.wav",
+        "${BASE_URL}" + "${m_cr}" + "5. kqwke-Barrier.mp3",
+        "${BASE_URL}" + "${m_cr}" + "6. Penilipo x Maomi_penilipo.mp3",
+        "${BASE_URL}" + "${m_cr}" + "7. ExitedParty_penilipo.wav",
+        "${BASE_URL}" + "${m_cr}" + "8. 8BITAMBIENT_penilipo.wav",
+        "${BASE_URL}" + "${m_cr}" + "9. EarthboundSoundsOnly_penilipo.wav",
+        "${BASE_URL}" + "${m_cr}" + "10. SEATURTLE_penilipo.mp3",
+        "${BASE_URL}" + "${m_cr}" + "11. print-hello-world_@warble_humanoid.mp3",
+        "${BASE_URL}" + "${m_cr}" + "evilbell_imsosha.mp3"
 
 ];
 const audioPlayer = new Audio();let currentTrackIndex = 0;let isPlaying = false;
 // function loadTrack() {audioPlayer.src = tracks[currentTrackIndex];document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');document.getElementById('progress-bar').style.width = '0%';}
 function loadTrack() {
-    const encodedTrack = encodeURI(tracks[currentTrackIndex]);
-    audioPlayer.src = encodedTrack;
+    const encodedTrack = encodeURI(tracks[currentTrackIndex]);audioPlayer.src = encodedTrack;
     document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');
     document.getElementById('progress-bar').style.width = '0%';
 }
@@ -490,10 +492,7 @@ function loadDefaultList() {
                 if (!place.url || !place.name) {invalid++;return;}
                 const id = place.id || extractPlaceId(place.url);const normalizedUrl = place.normalizedUrl || normalizeRobloxUrl(place.url);
                 const isDuplicate = savedPlaces.some(savedPlace => {
-                    return (id && savedPlace.id === id) || 
-                           savedPlace.normalizedUrl === normalizedUrl ||
-                           normalizeRobloxUrl(savedPlace.url) === normalizedUrl;
-                });
+                    return (id && savedPlace.id === id) || savedPlace.normalizedUrl === normalizedUrl || normalizeRobloxUrl(savedPlace.url) === normalizedUrl;});
                 if (isDuplicate) {duplicates++;
                 } else {
                     const completePlace = {id,name:place.name,url:place.url,category:place.category || '',normalizedUrl,
@@ -506,20 +505,7 @@ function loadDefaultList() {
 }
 
 
-function startConfetti() {
-    const canvas = document.createElement('canvas');canvas.style.position = 'fixed';canvas.style.top = '0';canvas.style.left = '0';canvas.style.width = '100%';canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';canvas.style.zIndex = '9999';document.body.appendChild(canvas);const ctx = canvas.getContext('2d');canvas.width = window.innerWidth;canvas.height = window.innerHeight;const particles = [];
-    const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
-    for (let i = 0; i < 150; i++) {particles.push({x: Math.random() * canvas.width,y: Math.random() * canvas.height - canvas.height,size: Math.random() * 8 + 3,color: colors[Math.floor(Math.random() * colors.length)],speedY: Math.random() * 3 + 2,speedX: Math.random() * 4 - 2,rotation: Math.random() * 360,rotationSpeed: Math.random() * 5 - 2.5});}
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {const p = particles[i];ctx.save();ctx.translate(p.x, p.y);ctx.rotate(p.rotation * Math.PI / 180);ctx.fillStyle = p.color;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);ctx.restore();p.y += p.speedY;p.x += p.speedX;p.rotation += p.rotationSpeed;if (p.y > canvas.height) {p.y = -10;p.x = Math.random() * canvas.width;}
-        }requestAnimationFrame(animate);}animate();setTimeout(() => {canvas.remove();}, 2500);
-}
-
-
-
+function startConfetti() {const canvas = document.createElement('canvas');canvas.style.position = 'fixed';canvas.style.top = '0';canvas.style.left = '0';canvas.style.width = '100%';canvas.style.height = '100%';canvas.style.pointerEvents = 'none';canvas.style.zIndex = '9999';document.body.appendChild(canvas);const ctx = canvas.getContext('2d');canvas.width = window.innerWidth;canvas.height = window.innerHeight;const particles = [];const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];for (let i = 0; i < 150; i++) {particles.push({x: Math.random() * canvas.width,y: Math.random() * canvas.height - canvas.height,size: Math.random() * 8 + 3,color: colors[Math.floor(Math.random() * colors.length)],speedY: Math.random() * 3 + 2,speedX: Math.random() * 4 - 2,rotation: Math.random() * 360,rotationSpeed: Math.random() * 5 - 2.5});}function animate() {ctx.clearRect(0, 0, canvas.width, canvas.height);for (let i = 0; i < particles.length; i++) {const p = particles[i];ctx.save();ctx.translate(p.x, p.y);ctx.rotate(p.rotation * Math.PI / 180);ctx.fillStyle = p.color;ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);ctx.restore();p.y += p.speedY;p.x += p.speedX;p.rotation += p.rotationSpeed;if (p.y > canvas.height) {p.y = -10;p.x = Math.random() * canvas.width;}}requestAnimationFrame(animate);}animate();setTimeout(() => {canvas.remove();}, 2500);}
 
 const randombackgroundinterval = setInterval(function() {setRandomBackground();},30000)
 const randombannerinterval = setInterval(function() {setRandomBanner();},60000)
@@ -529,5 +515,4 @@ window.onload = function() {
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
-    loadTrack();
 };
