@@ -1,39 +1,19 @@
 // AUTHOR BY AI & DeMorMr | https://github.com/DeMorMr
-//function sound(name) {var audio = new Audio();audio.src = 'data/main/sounds/' + name;audio.autoplay = true;return true;}
-
 function sound(name) {var audio = new Audio();audio.volume = 0.3;if (typeof name === 'string' && name.includes(',')) {var sounds = name.split(',').map(s => s.trim());var randomSound = sounds[Math.floor(Math.random() * sounds.length)];audio.src = 'data/main/sfx/' + randomSound;} else if (Array.isArray(name)) {var randomSound = name[Math.floor(Math.random() * name.length)];audio.src = 'data/main/sfx/' + randomSound;}else {audio.src = 'data/main/sfx/' + name;}audio.autoplay = true;return true;}
 function ExtraClearStorage() {const itemsCount = localStorage.length;localStorage.clear();alert(`Deleted: ${itemsCount}`);}
 function switchdiv(hideId, showId, displayType = 'block') {const hideElement = document.getElementById(hideId);const showElement = document.getElementById(showId);if (hideElement) hideElement.style.display = 'none';if (showElement) showElement.style.display = displayType;sound("click.mp3");}
 
-function switchSection(sectionId) {
-    document.querySelectorAll('.content-section').forEach(section => {section.style.display = 'none';});const targetSection = document.getElementById(sectionId);
-    if (targetSection) {targetSection.style.display = 'block';}sound("click.mp3");
-}
+function switchSection(sectionId) {document.querySelectorAll('.content-section').forEach(section => {section.style.display = 'none';});const targetSection = document.getElementById(sectionId);if (targetSection) {targetSection.style.display = 'block';}sound("click.mp3");}
 function initPage() {document.querySelectorAll('.content-section').forEach((section, index) => {if (index !== 0) section.style.display = 'none';});}
-
 
 function extractPlaceId(url) {const match = url.match(/(?:\/\/|\b)(?:www\.)?(?:rblx\.games|roblox\.com)\/games\/(\d+)(?:\/|$|\?)/);return match ? match[1] : null;}
 function normalizeRobloxUrl(url) {const id = extractPlaceId(url);if (!id) return url.toLowerCase();return `https://www.roblox.com/games/${id}`;}
 
-
 // --------------------------------------------------------------------------------
 function saveCache_just() {const cacheObj = Object.fromEntries(thumbnailCache);localStorage.setItem('thumbnailCache', JSON.stringify(cacheObj));}
 function loadCache_just() {const cachedData = localStorage.getItem('thumbnailCache');if (cachedData) thumbnailCache = new Map(Object.entries(JSON.parse(cachedData)));}
-function loadCache() {
-    const cacheData = localStorage.getItem('thumbnailCache');
-    if (cacheData) {
-        try {const cache = JSON.parse(cacheData);for (const [key, value] of Object.entries(cache)) {thumbnailCache.set(key, {url:value,timestamp:Date.now()});}console.log(`Loaded ${thumbnailCache.size} thumbnails from cache`);
-        } catch (e) {console.error('Failed to load thumbnail cache', e);}
-    }
-}
-function saveCache() {
-    if (thumbnailCache.size > 500) {
-        const entries = [...thumbnailCache.entries()]
-            .sort((a, b) => b[1].timestamp - a[1].timestamp)
-            .slice(0, 300);
-        thumbnailCache.clear();entries.forEach(([key, value]) => thumbnailCache.set(key, value));
-    }localStorage.setItem('thumbnailCache', JSON.stringify(Object.fromEntries([...thumbnailCache.entries()].map(([k, v]) => [k, v?.url || null]))));
-}
+function loadCache() {const cacheData = localStorage.getItem('thumbnailCache');if (cacheData) {try {const cache = JSON.parse(cacheData);for (const [key, value] of Object.entries(cache)) {thumbnailCache.set(key, {url:value,timestamp:Date.now()});}console.log(`Loaded ${thumbnailCache.size} thumbnails from cache`);} catch (e) {console.error('Failed to load thumbnail cache', e);}}}
+function saveCache() {if (thumbnailCache.size > 500) {const entries = [...thumbnailCache.entries()].sort((a, b) => b[1].timestamp - a[1].timestamp).slice(0, 300);thumbnailCache.clear();entries.forEach(([key, value]) => thumbnailCache.set(key, value));}localStorage.setItem('thumbnailCache', JSON.stringify(Object.fromEntries([...thumbnailCache.entries()].map(([k, v]) => [k, v?.url || null]))));}
 function clearThumbnailCache() {thumbnailCache.clear();}
 // --------------------------------------------------------------------------------
 
@@ -127,8 +107,6 @@ function downloadData() {
 // --------------------------------------------------------------------------------
 
 
-
- 
 /* BACKUP!!!
 async function getThumbnailUrl(placeId, size = 256) {
     const cacheKey = `${placeId}_${size}`;
@@ -356,7 +334,6 @@ function handleFileSelect(event) {const file = event.target.files[0];if (!file) 
 }
 
 // MUSIC PLAYER ---------------------------------------------------------------------------------
-
 /*   -------- OLD VERSION --------
 const audioPlayer=new Audio();
 const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
@@ -368,66 +345,60 @@ function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No
 function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;sound("click.mp3");}
 function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
 function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
-*/ 
-/*
-const bUrl = window.location.hostname === 'localhost' 
-    ? '' 
-    : 'https://demormr.github.io/roweb-discovery/';
 */
-const bUrl = ''
-const m_a = "data/main/mp3/";const m_cr = "data/main/cr/";
+const m_mp3 = "data/main/mp3/";const m_cr = "data/main/cr/";
 const tracks = [
-        bUrl + m_a + "Michael Wyckoff - Keygen.mp3",
-        bUrl + m_a + "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
-        bUrl + m_a + "Positively Dark- Awakening.mp3",
-        bUrl + m_a + "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
-        bUrl + m_a + "old roblox dance｜Roblox.mp3",
-        bUrl + m_a + "M.U.L.E Theme (ROBLOX music).mp3",
-        bUrl + m_a + "Flight of the Bumblebee Roblox.mp3",
-        bUrl + m_a + "Caramelldansen - Supergott - Roblox Music.mp3",
-        bUrl + m_a + "Bossfight - Starship Showdown.mp3",
-        bUrl + m_a + "Bossfight - Milky Ways.mp3",
-        bUrl + m_a + "Bossfight - Leaving Leafwood Forest.mp3",
-        bUrl + m_a + "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
-        bUrl + m_a + "Bossfight - Commando Steve.mp3",
-        bUrl + m_a + "Bossfight - Captain Cool.mp3",
-        bUrl + m_a + "Better Off Alone - Glejs (Remix).mp3",
-        bUrl + m_a + "30. Roblox Soundtrack - Party Music (2008).mp3",
-        bUrl + m_a + "29. Roblox Soundtrack - Explore ROBLOX.mp3",
-        bUrl + m_a + "28. Roblox Soundtrack - Online Social Hangout.mp3",
-        bUrl + m_a + "23. Roblox Soundtrack - Tycoon Game.mp3",
-        bUrl + m_a + "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
-        bUrl + m_a + "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
-        bUrl + m_a + "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
-        bUrl + m_a + "16. Roblox Soundtrack - Heli Wars.mp3",
-        bUrl + m_a + "13. Roblox Soundtrack - Contest Time!.mp3",
-        bUrl + m_a + "11. Roblox Soundtrack - Clan Being Raided.mp3",
-        bUrl + m_a + "09. Roblox Soundtrack - Crossroads Times.mp3",
-        bUrl + m_a + "08. Roblox Soundtrack - Noob Alert.mp3",
-        bUrl + m_a + "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
-        bUrl + m_a + "06. Roblox Soundtrack - Metal Bricks.mp3",
-        bUrl + m_a + "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
-        bUrl + m_a + "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
-        bUrl + m_a + "01. Roblox Soundtrack - The Main Theme.mp3",
-        bUrl + m_a + "its-raining-tacos!.mp3",
-        bUrl + m_a + "Toby Fox - A DARK ZONE.mp3",
+        m_mp3 + "Michael Wyckoff - Keygen.mp3",
+        m_mp3 + "Roblox Monster Mash Potion Remix ｜ Classy Doge Remix.mp3",
+        m_mp3 + "Positively Dark- Awakening.mp3",
+        m_mp3 + "Ragnarok Online - Monastery in Disguise (Cursed Abbey⧸Monastery) HD.mp3",
+        m_mp3 + "old roblox dance｜Roblox.mp3",
+        m_mp3 + "M.U.L.E Theme (ROBLOX music).mp3",
+        m_mp3 + "Flight of the Bumblebee Roblox.mp3",
+        m_mp3 + "Caramelldansen - Supergott - Roblox Music.mp3",
+        m_mp3 + "Bossfight - Starship Showdown.mp3",
+        m_mp3 + "Bossfight - Milky Ways.mp3",
+        m_mp3 + "Bossfight - Leaving Leafwood Forest.mp3",
+        m_mp3 + "Bossfight - Farbror Melker Fixar Fiskdamm (Fastbom Cover).mp3",
+        m_mp3 + "Bossfight - Commando Steve.mp3",
+        m_mp3 + "Bossfight - Captain Cool.mp3",
+        m_mp3 + "Better Off Alone - Glejs (Remix).mp3",
+        m_mp3 + "30. Roblox Soundtrack - Party Music (2008).mp3",
+        m_mp3 + "29. Roblox Soundtrack - Explore ROBLOX.mp3",
+        m_mp3 + "28. Roblox Soundtrack - Online Social Hangout.mp3",
+        m_mp3 + "23. Roblox Soundtrack - Tycoon Game.mp3",
+        m_mp3 + "19. Roblox Soundtrack - Santa's Winter Stronghold.mp3",
+        m_mp3 + "18. Roblox Soundtrack - 1x1x1x1's Creed.mp3",
+        m_mp3 + "17. Roblox Soundtrack - Big Clan⧸Group Recruitment Centre Entrance.mp3",
+        m_mp3 + "16. Roblox Soundtrack - Heli Wars.mp3",
+        m_mp3 + "13. Roblox Soundtrack - Contest Time!.mp3",
+        m_mp3 + "11. Roblox Soundtrack - Clan Being Raided.mp3",
+        m_mp3 + "09. Roblox Soundtrack - Crossroads Times.mp3",
+        m_mp3 + "08. Roblox Soundtrack - Noob Alert.mp3",
+        m_mp3 + "07. Roblox Soundtrack - Trouble Ahead (BONUS SONG) (Teddy9340's Production).mp3",
+        m_mp3 + "06. Roblox Soundtrack - Metal Bricks.mp3",
+        m_mp3 + "05. Roblox Soundtrack - Robloxia's Last Stand.mp3",
+        m_mp3 + "03. Roblox Soundtrack - Happy Day In Robloxia⧸Roblox HQ.mp3",
+        m_mp3 + "01. Roblox Soundtrack - The Main Theme.mp3",
+        m_mp3 + "its-raining-tacos!.mp3",
+        m_mp3 + "Toby Fox - A DARK ZONE.mp3",
 
-        bUrl + m_cr + "1. happy-pig_@warble_humanoid.mp3",
-        bUrl + m_cr + "2. lancer-waltz_penilipo.mp3",
-        bUrl + m_cr + "3. KEYGEN_penilipo.mp3",
-        bUrl + m_cr + "4. NEW-TRY_MostoThisStuff.wav",
-        bUrl + m_cr + "5. kqwke-Barrier.mp3",
-        bUrl + m_cr + "6. Penilipo x Maomi_penilipo.mp3",
-        bUrl + m_cr + "7. ExitedParty_penilipo.wav",
-        bUrl + m_cr + "8. 8BITAMBIENT_penilipo.wav",
-        bUrl + m_cr + "9. EarthboundSoundsOnly_penilipo.wav",
-        bUrl + m_cr + "10. SEATURTLE_penilipo.mp3",
-        bUrl + m_cr + "11. print-hello-world_@warble_humanoid.mp3",
-        bUrl + m_cr + "evilbell_imsosha.mp3"
+        m_cr + "1. happy-pig_@warble_humanoid.mp3",
+        m_cr + "2. lancer-waltz_penilipo.mp3",
+        m_cr + "3. KEYGEN_penilipo.mp3",
+        m_cr + "4. NEW-TRY_MostoThisStuff.wav",
+        m_cr + "5. kqwke-Barrier.mp3",
+        m_cr + "6. Penilipo x Maomi_penilipo.mp3",
+        m_cr + "7. ExitedParty_penilipo.wav",
+        m_cr + "8. 8BITAMBIENT_penilipo.wav",
+        m_cr + "9. EarthboundSoundsOnly_penilipo.wav",
+        m_cr + "10. SEATURTLE_penilipo.mp3",
+        m_cr + "11. print-hello-world_@warble_humanoid.mp3",
+        m_cr + "evilbell_imsosha.mp3"
 
 ];
 const audioPlayer = new Audio();let currentTrackIndex = 0;let isPlaying = false;
-// function loadTrack() {audioPlayer.src = tracks[currentTrackIndex];document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');document.getElementById('progress-bar').style.width = '0%';}
+
 function loadTrack() {
     const encodedTrack = encodeURI(tracks[currentTrackIndex]);audioPlayer.src = encodedTrack;
     document.getElementById('track-name').textContent = tracks[currentTrackIndex].split('/').pop().replace('.mp3', '');
