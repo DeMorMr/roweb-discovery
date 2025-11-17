@@ -369,6 +369,20 @@ function handleFileSelect(event) {
 }
 
 // MUSIC PLAYER --------------------------------------------------------------------------------
+
+
+/*   -------- OLD VERSION --------
+const audioPlayer=new Audio();
+const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
+const volumeSlider=document.getElementById('volume-slider');const trackName = document.getElementById('track-name');
+const progressBar=document.getElementById('progress-bar');const errorMsg = document.getElementById('error-message');
+let currentTrackIndex=0;let isPlaying=false;
+function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
+function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}currentTrackIndex = Math.floor(Math.random() * tracks.length);const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();}
+function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;sound("click.mp3");}
+function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
+function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
+*/
 const audioBasePaths = {
     audio: "data/main/audio/",
     cr: "data/main/cr/"
@@ -427,22 +441,10 @@ const trackFiles = {
     ]
 };
 
-/*   -------- OLD VERSION --------
-const audioPlayer=new Audio();
-const playBtn=document.getElementById('play-btn');const prevBtn = document.getElementById('prev-btn');const nextBtn = document.getElementById('next-btn');
-const volumeSlider=document.getElementById('volume-slider');const trackName = document.getElementById('track-name');
-const progressBar=document.getElementById('progress-bar');const errorMsg = document.getElementById('error-message');
-let currentTrackIndex=0;let isPlaying=false;
-function decodeFileName(encoded) {return decodeURIComponent(encoded).split('/').pop().replace(/\.[^/.]+$/, "");}
-function loadRandomTrack() {if (tracks.length === 0) {errorMsg.textContent = "No tracks found";return;}currentTrackIndex = Math.floor(Math.random() * tracks.length);const trackPath = tracks[currentTrackIndex];audioPlayer.src = trackPath;trackName.textContent = decodeFileName(trackPath);progressBar.style.width = '0%';audioPlayer.load();}
-function togglePlay() {if (!audioPlayer.src) {loadRandomTrack();}if (isPlaying) {audioPlayer.pause();playBtn.textContent = "▶";} else {audioPlayer.play().then(() => {playBtn.textContent = "⏸";}).catch(error => {errorMsg.textContent = "Playing error: " + error.message;console.error("Playing error", error);});}isPlaying = !isPlaying;sound("click.mp3");}
-function nextTrack() {currentTrackIndex = (currentTrackIndex + 1) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
-function prevTrack() {currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;loadRandomTrack();if (isPlaying) {audioPlayer.play().catch(e => {errorMsg.textContent = "AutoPlay error: " + e.message;});}sound("click.mp3");}
-*/
 const tracks = [];
 for (const [category, files] of Object.entries(trackFiles)) {
     files.forEach(file => {
-        const encodedFile = encodeURIComponent(file);
+        const encodedFile = encodeURI(file).replace(/'/g, "%27");
         tracks.push(audioBasePaths[category] + encodedFile);
     });
 }
@@ -496,9 +498,8 @@ function initializePlayer() {
     shuffleTracks();
     loadTrack(0);
     
-
-    audioPlayer.preload = "auto";
-    audioPlayer.crossOrigin = "anonymous";
+    audioPlayer.preload = "metadata";
+    audioPlayer.volume = volumeSlider.value;
     
     audioPlayer.addEventListener('timeupdate', updateProgress);
     audioPlayer.addEventListener('ended', nextTrack);
@@ -510,6 +511,14 @@ function initializePlayer() {
     prevBtn.addEventListener('click', prevTrack);
     nextBtn.addEventListener('click', nextTrack);
     volumeSlider.addEventListener('input', setVolume);
+    
+
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+}
+
+function handleFirstInteraction() {
+    userInteracted = true;
+    console.log("User interaction detected - autoplay enabled");
 }
 
 function handleLoadStart() {
@@ -523,15 +532,18 @@ function handleCanPlay() {
 function handleAudioError(e) {
     console.error("Audio error:", audioPlayer.error);
     console.error("Failed URL:", audioPlayer.src);
-    showError("Cannot play: " + decodeFileName(audioPlayer.src));
+    
+    const fileName = decodeFileName(audioPlayer.src);
+    showError(`File not found: ${fileName}`);
+    
 
     setTimeout(() => {
         if (shuffledTracks.length > 1) {
+            console.log("Skipping to next track due to error");
             nextTrack();
         }
-    }, 2000);
+    }, 1000);
 }
-
 
 function decodeFileName(encoded) {
     try {
@@ -559,6 +571,9 @@ function loadTrack(index) {
     }
     
     console.log("Loading track:", trackPath);
+    
+
+    preloadNextTrack();
 }
 
 function togglePlay() {
@@ -574,19 +589,24 @@ function togglePlay() {
         playBtn.textContent = "▶";
         isPlaying = false;
     } else {
-        if (!audioPlayer.src) {
+        if (!audioPlayer.src || audioPlayer.error) {
             loadTrack(currentTrackIndex);
         }
-        audioPlayer.play().then(() => {
-            playBtn.textContent = "⏸";
-            isPlaying = true;
-            console.log("Successfully playing:", audioPlayer.src);
-        }).catch(error => {
-            showError("Playback failed. Click play again.");
-            console.error("Play error:", error);
-            isPlaying = false;
-            playBtn.textContent = "▶";
-        });
+        
+        const playPromise = audioPlayer.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                playBtn.textContent = "⏸";
+                isPlaying = true;
+                console.log("Successfully playing:", audioPlayer.src);
+            }).catch(error => {
+                showError("Playback failed. Click play again.");
+                console.error("Play error:", error);
+                isPlaying = false;
+                playBtn.textContent = "▶";
+            });
+        }
     }
     sound("click.mp3");
 }
@@ -595,16 +615,16 @@ function nextTrack() {
     if (shuffledTracks.length <= 1) return;
     const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;
     loadTrack(nextIndex);
+    
     if (isPlaying && userInteracted) {
         audioPlayer.play().catch(error => {
-            showError("Auto-play failed");
+            console.error("Auto-play failed:", error);
             isPlaying = false;
             playBtn.textContent = "▶";
         });
     }
     sound("click.mp3");
 }
-
 
 function prevTrack() {
     if (shuffledTracks.length <= 1) return;
@@ -613,7 +633,7 @@ function prevTrack() {
     
     if (isPlaying && userInteracted) {
         audioPlayer.play().catch(error => {
-            showError("Auto-play failed");
+            console.error("Auto-play failed:", error);
             isPlaying = false;
             playBtn.textContent = "▶";
         });
@@ -626,21 +646,25 @@ function setVolume() {
 }
 
 function updateProgress() {
-    if (audioPlayer.duration) {
+    if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
         const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
         progressBar.style.width = progress + '%';
     }
 }
 
 function preloadNextTrack() {
+    if (shuffledTracks.length <= 1) return;
+    
     const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;
     const nextTrack = new Audio();
     nextTrack.preload = "metadata";
     nextTrack.src = shuffledTracks[nextIndex];
 }
 
+
 progressBar.parentElement.addEventListener('click', (e) => {
-    if (!audioPlayer.duration) return;
+    if (!audioPlayer.duration || isNaN(audioPlayer.duration)) return;
+    
     const rect = progressBar.parentElement.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
     audioPlayer.currentTime = percent * audioPlayer.duration;
