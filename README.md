@@ -35,5 +35,5 @@ Somewhere in 2025-26?
  4. Something? Join our Discord server and suggest an idea!
 </div>
 
-<h1 aligin='top'><image src="https://github.com/DeMorMr/Default-Discord-Bot/blob/main/.github/assets/icon_document.svg" alt="icon document" width="50">I make this, alone :( If u want help me join to discord server</h1>
+<div align="center"><h1 aligin='top'><image src="https://github.com/DeMorMr/Default-Discord-Bot/blob/main/.github/assets/icon_document.svg" alt="icon document" width="50">I make this, alone :(<br>If u want help me join to discord server</h1></div>
 <div align="center">!!! ROBLOX, "Online Building Toy", characters, logos, names, and all related indicia are trademarks of ROBLOX Corporation, ©2008. !!!</div>
