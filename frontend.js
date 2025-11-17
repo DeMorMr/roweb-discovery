@@ -460,7 +460,7 @@ let currentTrackIndex = 0;
 let isPlaying = false;
 let shuffledTracks = [];
 let errorTimeout = null;
-
+let userInteracted = false;
 
 function showError(message, duration = 3000) {
     errorMsg.textContent = message;
@@ -487,6 +487,7 @@ function shuffleTracks() {
 function initializePlayer() {
     if (tracks.length === 0) {
         showError("No tracks available");
+        playBtn.disabled = true;
         return;
     }
     
@@ -549,7 +550,6 @@ function loadTrack(index) {
     trackName.textContent = decodeFileName(trackPath);
     progressBar.style.width = '0%';
     
-
     errorMsg.textContent = '';
     if (errorTimeout) {
         clearTimeout(errorTimeout);
@@ -557,26 +557,65 @@ function loadTrack(index) {
     }
     
     console.log("Loading track:", trackPath);
+}
+
+function togglePlay() {
+    if (shuffledTracks.length === 0) {
+        showError("No tracks available");
+        return;
+    }
+
+    userInteracted = true;
     
     if (isPlaying) {
-        audioPlayer.play().catch(error => {
-            showError("Play failed: " + decodeFileName(trackPath));
+        audioPlayer.pause();
+        playBtn.textContent = "▶";
+        isPlaying = false;
+    } else {
+        if (!audioPlayer.src) {
+            loadTrack(currentTrackIndex);
+        }
+        audioPlayer.play().then(() => {
+            playBtn.textContent = "⏸";
+            isPlaying = true;
+            console.log("Successfully playing:", audioPlayer.src);
+        }).catch(error => {
+            showError("Playback failed. Click play again.");
             console.error("Play error:", error);
             isPlaying = false;
             playBtn.textContent = "▶";
         });
     }
-}
-
-function nextTrack() {
-    const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;
-    loadTrack(nextIndex);
     sound("click.mp3");
 }
 
+function nextTrack() {
+    if (shuffledTracks.length <= 1) return;
+    const nextIndex = (currentTrackIndex + 1) % shuffledTracks.length;
+    loadTrack(nextIndex);
+    if (isPlaying && userInteracted) {
+        audioPlayer.play().catch(error => {
+            showError("Auto-play failed");
+            isPlaying = false;
+            playBtn.textContent = "▶";
+        });
+    }
+    sound("click.mp3");
+}
+
+
 function prevTrack() {
+    if (shuffledTracks.length <= 1) return;
     const prevIndex = (currentTrackIndex - 1 + shuffledTracks.length) % shuffledTracks.length;
     loadTrack(prevIndex);
+    
+    if (isPlaying && userInteracted) {
+        audioPlayer.play().catch(error => {
+            showError("Auto-play failed");
+            isPlaying = false;
+            playBtn.textContent = "▶";
+        });
+    }
     sound("click.mp3");
 }
 
