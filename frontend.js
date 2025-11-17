@@ -404,6 +404,7 @@ const songs = {
   ]
 };
 
+
 function mixTracks(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -411,6 +412,7 @@ function mixTracks(array) {
   }
   return array;
 }
+
 
 function createPlaylist() {
   const allTracks = [
@@ -426,22 +428,47 @@ const player = new Audio();
 let currentTrack = 0;
 let playing = false;
 let userClicked = false;
+let isSeeking = false;
+let lastSetProgress = 0;
 
 
 function loadTrack() {
   const track = encodeURI(playlist[currentTrack]);
   player.src = track;
+  
+
+  player.preload = "metadata";
+  player.load();
+  
   document.getElementById('track-name').textContent = playlist[currentTrack].split('/').pop().replace(/\.(mp3|wav)$/, '');
   document.getElementById('progress-bar').style.width = '0%';
+  lastSetProgress = 0;
 }
 
 
 document.querySelector('.progress').addEventListener('click', (e) => {
-  if (!player.duration) return;
+  if (!player.duration || player.duration === Infinity) return;
+  
   const rect = e.currentTarget.getBoundingClientRect();
   const percent = (e.clientX - rect.left) / rect.width;
-  player.currentTime = percent * player.duration;
+  const newTime = percent * player.duration;
+  
+
+  isSeeking = true;
+  
+
   document.getElementById('progress-bar').style.width = `${percent * 100}%`;
+  lastSetProgress = percent * 100;
+  
+
+  player.currentTime = newTime;
+  
+
+  const onCanPlay = () => {
+    isSeeking = false;
+    player.removeEventListener('canplay', onCanPlay);
+  };
+  player.addEventListener('canplay', onCanPlay);
 });
 
 document.getElementById('play-btn').addEventListener('click', () => {
@@ -485,10 +512,28 @@ document.getElementById('volume-slider').addEventListener('input', (e) => {
 });
 
 player.addEventListener('timeupdate', () => {
-  if (player.duration) {
+
+  if (isSeeking) return;
+  
+  if (player.duration && player.duration !== Infinity) {
     const progress = (player.currentTime / player.duration) * 100;
     document.getElementById('progress-bar').style.width = `${progress}%`;
+    lastSetProgress = progress;
   }
+});
+
+player.addEventListener('seeked', () => {
+  isSeeking = false;
+});
+
+player.addEventListener('waiting', () => {
+
+  document.getElementById('error-message').textContent = "Loading...";
+});
+
+player.addEventListener('canplay', () => {
+
+  document.getElementById('error-message').textContent = "";
 });
 
 player.addEventListener('ended', () => {
@@ -497,7 +542,9 @@ player.addEventListener('ended', () => {
   if (playing && userClicked) player.play();
 });
 
+
 player.volume = 0.7;
+
 
 document.addEventListener('click', () => {
   userClicked = true;
