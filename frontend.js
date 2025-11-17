@@ -442,7 +442,7 @@ function safePlay() {
     isPlaying = true;
     return true;
   }).catch(e => {
-    document.getElementById('error-message').textContent = "Playback error: " + e.message;
+    //document.getElementById('error-message').textContent = "Playback error: " + e.message;
     document.getElementById('play-btn').textContent = "▶";
     isPlaying = false;
     return false;
