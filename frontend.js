@@ -412,7 +412,7 @@ function mixTracks(array) {
   return array;
 }
 
-function makePlaylist() {
+function createPlaylist() {
   const allTracks = [
     ...songs.mp3.map(file => paths.mp3 + file),
     ...songs.cr.map(file => paths.cr + file)
@@ -420,95 +420,87 @@ function makePlaylist() {
   return mixTracks(allTracks);
 }
 
-const playlist = makePlaylist();
+const playlist = createPlaylist();
 
-const audioPlayer = new Audio();
-let currentTrackIndex = 0;
-let isPlaying = false;
-let userInteracted = false;
+const player = new Audio();
+let currentTrack = 0;
+let playing = false;
+let userClicked = false;
+
 
 function loadTrack() {
-  const encodedTrack = encodeURI(playlist[currentTrackIndex]);
-  audioPlayer.src = encodedTrack;
-  document.getElementById('track-name').textContent = playlist[currentTrackIndex].split('/').pop().replace(/\.(mp3|wav)$/, '');
+  const track = encodeURI(playlist[currentTrack]);
+  player.src = track;
+  document.getElementById('track-name').textContent = playlist[currentTrack].split('/').pop().replace(/\.(mp3|wav)$/, '');
   document.getElementById('progress-bar').style.width = '0%';
 }
 
-function safePlay() {
-  if (!userInteracted) return false;
-  
-  return audioPlayer.play().then(() => {
-    document.getElementById('play-btn').textContent = "⏸";
-    isPlaying = true;
-    return true;
-  }).catch(e => {
-    //document.getElementById('error-message').textContent = "Playback error: " + e.message;
-    document.getElementById('play-btn').textContent = "▶";
-    isPlaying = false;
-    return false;
-  });
-}
 
 document.querySelector('.progress').addEventListener('click', (e) => {
-  if (!audioPlayer.duration) return;
+  if (!player.duration) return;
   const rect = e.currentTarget.getBoundingClientRect();
   const percent = (e.clientX - rect.left) / rect.width;
-  audioPlayer.currentTime = percent * audioPlayer.duration;
+  player.currentTime = percent * player.duration;
   document.getElementById('progress-bar').style.width = `${percent * 100}%`;
 });
 
 document.getElementById('play-btn').addEventListener('click', () => {
-  userInteracted = true;
+  userClicked = true;
   
-  if (!audioPlayer.src) loadTrack();
-  if (isPlaying) {
-    audioPlayer.pause();
+  if (!player.src) loadTrack();
+  if (playing) {
+    player.pause();
     document.getElementById('play-btn').textContent = "▶";
-    isPlaying = false;
+    playing = false;
   } else {
-    safePlay();
+    player.play().then(() => {
+      document.getElementById('play-btn').textContent = "⏸";
+      playing = true;
+    }).catch(e => {
+      document.getElementById('error-message').textContent = "Ошибка: " + e.message;
+      document.getElementById('play-btn').textContent = "▶";
+      playing = false;
+    });
   }
 });
 
 document.getElementById('next-btn').addEventListener('click', () => {
-  userInteracted = true;
-  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  userClicked = true;
+  currentTrack = (currentTrack + 1) % playlist.length;
   loadTrack();
-  if (isPlaying) safePlay();
+  if (playing) player.play();
   sound("click.mp3");
 });
 
 document.getElementById('prev-btn').addEventListener('click', () => {
-  userInteracted = true;
-  currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+  userClicked = true;
+  currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
   loadTrack();
-  if (isPlaying) safePlay();
+  if (playing) player.play();
   sound("click.mp3");
 });
 
 document.getElementById('volume-slider').addEventListener('input', (e) => {
-  audioPlayer.volume = e.target.value;
+  player.volume = e.target.value;
 });
 
-audioPlayer.addEventListener('timeupdate', () => {
-  if (audioPlayer.duration) {
-    const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-    document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+player.addEventListener('timeupdate', () => {
+  if (player.duration) {
+    const progress = (player.currentTime / player.duration) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
   }
 });
 
-audioPlayer.addEventListener('ended', () => {
-  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+player.addEventListener('ended', () => {
+  currentTrack = (currentTrack + 1) % playlist.length;
   loadTrack();
-  if (isPlaying) safePlay();
+  if (playing && userClicked) player.play();
 });
 
-
-audioPlayer.volume = 0.7;
-
+player.volume = 0.7;
 
 document.addEventListener('click', () => {
-  userInteracted = true;
+  userClicked = true;
 }, { once: true });
 // --------------------------------------------------------------------------------
 
