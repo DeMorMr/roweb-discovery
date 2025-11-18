@@ -462,7 +462,7 @@ function playAudio() {
 
     startProgressUpdate();
   }).catch(e => {
-    document.getElementById('error-message').textContent = "Ошибка: " + e.message;
+    document.getElementById('error-message').textContent = "Error: " + e.message;
     document.getElementById('play-btn').textContent = "▶";
     playing = false;
   });
@@ -542,7 +542,7 @@ document.querySelector('.progress').addEventListener('click', (e) => {
     }
   } else {
     player.currentTime = newTime;
-    document.getElementById('error-message').textContent = "Загрузка сегмента...";
+    document.getElementById('error-message').textContent = "Loading....";
     
     const checkBuffering = setInterval(() => {
       if (isTimeBuffered(newTime) || player.readyState >= 3) {
@@ -593,7 +593,7 @@ document.getElementById('volume-slider').addEventListener('input', (e) => {
 });
 
 player.addEventListener('loadstart', () => {
-  document.getElementById('error-message').textContent = "Начало загрузки...";
+  document.getElementById('error-message').textContent = "Loading..";
 });
 
 player.addEventListener('progress', () => {
@@ -603,11 +603,11 @@ player.addEventListener('progress', () => {
 player.addEventListener('seeking', () => {
   isSeeking = true;
   stopProgressUpdate();
-  document.getElementById('error-message').textContent = "Перемотка...";
+  document.getElementById('error-message').textContent = "Loading.";
 });
 
 player.addEventListener('seeked', () => {
-  document.getElementById('error-message').textContent = "Загрузка сегмента...";
+  document.getElementById('error-message').textContent = "Loading....";
 });
 
 player.addEventListener('canplay', () => {
@@ -619,18 +619,18 @@ player.addEventListener('canplay', () => {
 });
 
 player.addEventListener('canplaythrough', () => {
-  document.getElementById('error-message').textContent = "Трек полностью загружен";
+  document.getElementById('error-message').textContent = "Full download.";
   setTimeout(() => {
     document.getElementById('error-message').textContent = "";
   }, 2000);
 });
 
 player.addEventListener('waiting', () => {
-  document.getElementById('error-message').textContent = "Буферизация...";
+  document.getElementById('error-message').textContent = "Buffer...";
 });
 
 player.addEventListener('stalled', () => {
-  document.getElementById('error-message').textContent = "Проблемы с загрузкой...";
+  document.getElementById('error-message').textContent = "Problem with loading...";
 });
 
 player.addEventListener('ended', () => {
