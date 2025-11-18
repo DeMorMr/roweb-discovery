@@ -440,7 +440,7 @@ function loadTrack() {
   player.src = "";
   bufferedRanges = [];
   
-  player.preload = "auto"; 
+  player.preload = "metadata"; 
   player.load();
   
   const trackName = playlist[currentTrack].split('/').pop().replace(/\.(mp3|wav)$/, '');
