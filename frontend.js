@@ -406,11 +406,12 @@ const songs = {
 
 
 function mixTracks(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
-  return array;
+  return newArray;
 }
 
 
@@ -429,65 +430,145 @@ let currentTrack = 0;
 let playing = false;
 let userClicked = false;
 let isSeeking = false;
-let lastSetProgress = 0;
+let progressUpdateInterval = null;
 
+let bufferedRanges = [];
 
 function loadTrack() {
   const track = encodeURI(playlist[currentTrack]);
-  player.src = track;
   
-
-  player.preload = "metadata";
+  player.src = "";
+  bufferedRanges = [];
+  
+  player.preload = "auto"; 
   player.load();
   
-  document.getElementById('track-name').textContent = playlist[currentTrack].split('/').pop().replace(/\.(mp3|wav)$/, '');
+  const trackName = playlist[currentTrack].split('/').pop().replace(/\.(mp3|wav)$/, '');
+  document.getElementById('track-name').textContent = trackName;
   document.getElementById('progress-bar').style.width = '0%';
-  lastSetProgress = 0;
+  
+
+  if (progressUpdateInterval) {
+    clearInterval(progressUpdateInterval);
+    progressUpdateInterval = null;
+  }
+}
+
+
+function playAudio() {
+  return player.play().then(() => {
+    document.getElementById('play-btn').textContent = "⏸";
+    playing = true;
+
+    startProgressUpdate();
+  }).catch(e => {
+    document.getElementById('error-message').textContent = "Ошибка: " + e.message;
+    document.getElementById('play-btn').textContent = "▶";
+    playing = false;
+  });
+}
+
+
+function startProgressUpdate() {
+
+  if (progressUpdateInterval) {
+    clearInterval(progressUpdateInterval);
+  }
+  
+
+  progressUpdateInterval = setInterval(() => {
+    if (!isSeeking && player.duration && !isNaN(player.duration) && playing) {
+      const progress = (player.currentTime / player.duration) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+      
+
+      updateBufferedRanges();
+    }
+  }, 100);
+}
+
+
+function updateBufferedRanges() {
+  if (player.buffered && player.buffered.length > 0) {
+    bufferedRanges = [];
+    for (let i = 0; i < player.buffered.length; i++) {
+      bufferedRanges.push({
+        start: player.buffered.start(i),
+        end: player.buffered.end(i)
+      });
+    }
+  }
+}
+
+
+function isTimeBuffered(time) {
+  for (const range of bufferedRanges) {
+    if (time >= range.start && time <= range.end) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+function stopProgressUpdate() {
+  if (progressUpdateInterval) {
+    clearInterval(progressUpdateInterval);
+    progressUpdateInterval = null;
+  }
 }
 
 
 document.querySelector('.progress').addEventListener('click', (e) => {
-  if (!player.duration || player.duration === Infinity) return;
+  if (!player.duration || isNaN(player.duration)) return;
   
   const rect = e.currentTarget.getBoundingClientRect();
-  const percent = (e.clientX - rect.left) / rect.width;
+  const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   const newTime = percent * player.duration;
+  
+
+  stopProgressUpdate();
   
 
   isSeeking = true;
   
-
   document.getElementById('progress-bar').style.width = `${percent * 100}%`;
-  lastSetProgress = percent * 100;
   
-
-  player.currentTime = newTime;
-  
-
-  const onCanPlay = () => {
+  if (isTimeBuffered(newTime)) {
+    player.currentTime = newTime;
     isSeeking = false;
-    player.removeEventListener('canplay', onCanPlay);
-  };
-  player.addEventListener('canplay', onCanPlay);
+    if (playing) {
+      startProgressUpdate();
+    }
+  } else {
+    player.currentTime = newTime;
+    document.getElementById('error-message').textContent = "Загрузка сегмента...";
+    
+    const checkBuffering = setInterval(() => {
+      if (isTimeBuffered(newTime) || player.readyState >= 3) {
+        clearInterval(checkBuffering);
+        isSeeking = false;
+        document.getElementById('error-message').textContent = "";
+        if (playing) {
+          startProgressUpdate();
+        }
+      }
+    }, 100);
+  }
 });
 
 document.getElementById('play-btn').addEventListener('click', () => {
   userClicked = true;
   
   if (!player.src) loadTrack();
+  
   if (playing) {
     player.pause();
     document.getElementById('play-btn').textContent = "▶";
     playing = false;
+    stopProgressUpdate();
   } else {
-    player.play().then(() => {
-      document.getElementById('play-btn').textContent = "⏸";
-      playing = true;
-    }).catch(e => {
-      document.getElementById('error-message').textContent = "Ошибка: " + e.message;
-      document.getElementById('play-btn').textContent = "▶";
-      playing = false;
-    });
+    playAudio();
   }
 });
 
@@ -495,52 +576,80 @@ document.getElementById('next-btn').addEventListener('click', () => {
   userClicked = true;
   currentTrack = (currentTrack + 1) % playlist.length;
   loadTrack();
-  if (playing) player.play();
-  sound("click.mp3");
+  if (playing) playAudio();
+  if (typeof sound === 'function') sound("click.mp3");
 });
 
 document.getElementById('prev-btn').addEventListener('click', () => {
   userClicked = true;
   currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
   loadTrack();
-  if (playing) player.play();
-  sound("click.mp3");
+  if (playing) playAudio();
+  if (typeof sound === 'function') sound("click.mp3");
 });
 
 document.getElementById('volume-slider').addEventListener('input', (e) => {
   player.volume = e.target.value;
 });
 
-player.addEventListener('timeupdate', () => {
+player.addEventListener('loadstart', () => {
+  document.getElementById('error-message').textContent = "Начало загрузки...";
+});
 
-  if (isSeeking) return;
-  
-  if (player.duration && player.duration !== Infinity) {
-    const progress = (player.currentTime / player.duration) * 100;
-    document.getElementById('progress-bar').style.width = `${progress}%`;
-    lastSetProgress = progress;
-  }
+player.addEventListener('progress', () => {
+  updateBufferedRanges();
+});
+
+player.addEventListener('seeking', () => {
+  isSeeking = true;
+  stopProgressUpdate();
+  document.getElementById('error-message').textContent = "Перемотка...";
 });
 
 player.addEventListener('seeked', () => {
-  isSeeking = false;
-});
-
-player.addEventListener('waiting', () => {
-
-  document.getElementById('error-message').textContent = "Loading...";
+  document.getElementById('error-message').textContent = "Загрузка сегмента...";
 });
 
 player.addEventListener('canplay', () => {
-
+  isSeeking = false;
   document.getElementById('error-message').textContent = "";
+  if (playing) {
+    startProgressUpdate();
+  }
+});
+
+player.addEventListener('canplaythrough', () => {
+  document.getElementById('error-message').textContent = "Трек полностью загружен";
+  setTimeout(() => {
+    document.getElementById('error-message').textContent = "";
+  }, 2000);
+});
+
+player.addEventListener('waiting', () => {
+  document.getElementById('error-message').textContent = "Буферизация...";
+});
+
+player.addEventListener('stalled', () => {
+  document.getElementById('error-message').textContent = "Проблемы с загрузкой...";
 });
 
 player.addEventListener('ended', () => {
   currentTrack = (currentTrack + 1) % playlist.length;
   loadTrack();
-  if (playing && userClicked) player.play();
+  if (playing && userClicked) playAudio();
 });
+
+player.addEventListener('pause', () => {
+  stopProgressUpdate();
+});
+
+
+function preloadNextTrack() {
+  const nextTrackIndex = (currentTrack + 1) % playlist.length;
+  const nextTrack = new Audio();
+  nextTrack.preload = "metadata";
+  nextTrack.src = encodeURI(playlist[nextTrackIndex]);
+}
 
 
 player.volume = 0.7;
@@ -549,6 +658,9 @@ player.volume = 0.7;
 document.addEventListener('click', () => {
   userClicked = true;
 }, { once: true });
+
+
+
 // --------------------------------------------------------------------------------
 
 
@@ -622,8 +734,10 @@ const randombackgroundinterval = setInterval(function() {setRandomBackground();}
 const randombannerinterval = setInterval(function() {setRandomBanner();},60000)
 
 window.onload = function() {
-    loadTrack();setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
+    setRandomBackground();initCategories();populateCategoryDropdowns();setRandomBanner();renderPlaces();nextCoolSet();
     document.getElementById('categoryFilter').addEventListener('change', function() {currentPage = 0;renderPlaces();});
     document.getElementById('prevCoolBtn').addEventListener('click', prevCoolSet);document.getElementById('nextCoolBtn').addEventListener('click', nextCoolSet);
     document.getElementById('importFile').addEventListener('change', handleFileSelect);
+    loadTrack();
+    preloadNextTrack();
 };
