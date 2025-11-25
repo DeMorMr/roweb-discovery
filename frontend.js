@@ -404,267 +404,45 @@ const songs = {
   ]
 };
 
-
-
-function mixTracks(array) {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-}
-
-function createPlaylist() {
-  const allTracks = [
-    ...songs.mp3.map(file => paths.mp3 + file),
-    ...songs.cr.map(file => paths.cr + file)
-  ];
-  return mixTracks(allTracks);
-}
-
+function mixTracks(array) {const newArray = [...array];for (let i = newArray.length - 1; i > 0; i--) {const j = Math.floor(Math.random() * (i + 1));[newArray[i], newArray[j]] = [newArray[j], newArray[i]];}return newArray;}
+function createPlaylist() {const allTracks = [...songs.mp3.map(file => paths.mp3 + file),...songs.cr.map(file => paths.cr + file)];return mixTracks(allTracks);}
 const playlist = createPlaylist();
-
-const player = new Audio();
-let currentTrack = 0;
-let playing = false;
-let userClicked = false;
-let isSeeking = false;
-let progressUpdateInterval = null;
-let audioContextInitialized = false;
-
-let bufferedRanges = [];
-
+const player = new Audio();let currentTrack = 0;let playing = false;let userClicked = false;let isSeeking = false;let progressUpdateInterval = null;let bufferedRanges = [];
 function loadTrack() {
-  const trackPath = encodeURI(playlist[currentTrack]);
-  
-  player.src = trackPath;
+  const TrackPath = encodeURI(playlist[currentTrack]);console.log('Loading track:', TrackPath);
+  player.src = TrackPath;
   bufferedRanges = [];
-  
   player.preload = "metadata"; 
   player.load();
-  
   const trackName = playlist[currentTrack].split('/').pop().replace(/\.(mp3|wav)$/, '');
   document.getElementById('track-name').textContent = trackName;
   document.getElementById('progress-bar').style.width = '0%';
-
-  if (progressUpdateInterval) {
-    clearInterval(progressUpdateInterval);
-    progressUpdateInterval = null;
-  }
+  if (progressUpdateInterval) {clearInterval(progressUpdateInterval);progressUpdateInterval = null;}
 }
-
-function initializeAudioContext() {
-  if (!audioContextInitialized) {
-
-    const silentAudio = new Audio();
-    silentAudio.src = 'data:audio/wav;base64,UklGRnoAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAAC';
-    silentAudio.volume = 0.001;
-    silentAudio.play().then(() => {
-      silentAudio.pause();
-      audioContextInitialized = true;
-    }).catch(e => {
-      console.log('Audio context initialization failed:', e);
-    });
-  }
-}
-
-function playAudio() {
-
-  if (!audioContextInitialized) {
-    initializeAudioContext();
-  }
-  
-  return player.play().then(() => {
-    document.getElementById('play-btn').textContent = "⏸";
-    playing = true;
-    startProgressUpdate();
-  }).catch(e => {
-    if (e.name === 'NotAllowedError') {
-      document.getElementById('error-message').textContent = "Please click play again to start playback";
-
-    } else {
-      document.getElementById('error-message').textContent = "Error: " + e.message;
-      document.getElementById('play-btn').textContent = "▶";
-      playing = false;
-    }
-  });
-}
-
-function startProgressUpdate() {
-  if (progressUpdateInterval) {
-    clearInterval(progressUpdateInterval);
-  }
-  progressUpdateInterval = setInterval(() => {
-    if (!isSeeking && player.duration && !isNaN(player.duration) && playing) {
-      const progress = (player.currentTime / player.duration) * 100;
-      document.getElementById('progress-bar').style.width = `${progress}%`;
-      updateBufferedRanges();
-    }
-  }, 100);
-}
-
-function updateBufferedRanges() {
-  if (player.buffered && player.buffered.length > 0) {
-    bufferedRanges = [];
-    for (let i = 0; i < player.buffered.length; i++) {
-      bufferedRanges.push({
-        start: player.buffered.start(i),
-        end: player.buffered.end(i)
-      });
-    }
-  }
-}
-
-function isTimeBuffered(time) {
-  for (const range of bufferedRanges) {
-    if (time >= range.start && time <= range.end) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function stopProgressUpdate() {
-  if (progressUpdateInterval) {
-    clearInterval(progressUpdateInterval);
-    progressUpdateInterval = null;
-  }
-}
-
-
-document.querySelector('.progress').addEventListener('click', (e) => {
-  if (!player.duration || isNaN(player.duration)) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  const newTime = percent * player.duration;
-  stopProgressUpdate();
-  isSeeking = true;
-  document.getElementById('progress-bar').style.width = `${percent * 100}%`;
-  if (isTimeBuffered(newTime)) {
-    player.currentTime = newTime;
-    isSeeking = false;
-    if (playing) {
-      startProgressUpdate();
-    }
-  } else {
-    player.currentTime = newTime;
-    document.getElementById('error-message').textContent = "Loading....";
-    const checkBuffering = setInterval(() => {
-      if (isTimeBuffered(newTime) || player.readyState >= 3) {
-        clearInterval(checkBuffering);
-        isSeeking = false;
-        document.getElementById('error-message').textContent = "";
-        if (playing) {
-          startProgressUpdate();
-        }
-      }
-    }, 100);
-  }
-});
-
-document.getElementById('play-btn').addEventListener('click', () => {
-  userClicked = true;
-  if (!player.src) loadTrack();
-  if (playing) {
-    player.pause();
-    document.getElementById('play-btn').textContent = "▶";
-    playing = false;
-    stopProgressUpdate();
-  } else {
-    playAudio();
-  }
-});
-
-document.getElementById('next-btn').addEventListener('click', () => {
-  userClicked = true;
-  currentTrack = (currentTrack + 1) % playlist.length;
-  loadTrack();
-  if (playing) playAudio();
-  if (typeof sound === 'function') sound("click.mp3");
-});
-
-document.getElementById('prev-btn').addEventListener('click', () => {
-  userClicked = true;
-  currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
-  loadTrack();
-  if (playing) playAudio();
-  if (typeof sound === 'function') sound("click.mp3");
-});
-
-document.getElementById('volume-slider').addEventListener('input', (e) => {
-  player.volume = e.target.value;
-});
-
-// События плеера
-player.addEventListener('loadstart', () => {
-  document.getElementById('error-message').textContent = "Loading..";
-});
-
-player.addEventListener('progress', () => {
-  updateBufferedRanges();
-});
-
-player.addEventListener('seeking', () => {
-  isSeeking = true;
-  stopProgressUpdate();
-  document.getElementById('error-message').textContent = "Loading.";
-});
-
-player.addEventListener('seeked', () => {
-  document.getElementById('error-message').textContent = "Loading....";
-});
-
-player.addEventListener('canplay', () => {
-  isSeeking = false;
-  document.getElementById('error-message').textContent = "";
-  if (playing) {
-    startProgressUpdate();
-  }
-});
-
-player.addEventListener('canplaythrough', () => {
-  document.getElementById('error-message').textContent = "Full download.";
-  setTimeout(() => {
-    document.getElementById('error-message').textContent = "";
-  }, 2000);
-});
-
-player.addEventListener('waiting', () => {
-  document.getElementById('error-message').textContent = "Buffer...";
-});
-
-player.addEventListener('stalled', () => {
-  document.getElementById('error-message').textContent = "Problem with loading...";
-});
-
-player.addEventListener('ended', () => {
-  currentTrack = (currentTrack + 1) % playlist.length;
-  loadTrack();
-  if (playing && userClicked) playAudio();
-});
-
-player.addEventListener('pause', () => {
-  stopProgressUpdate();
-});
-
-function preloadNextTrack() {
-  const nextTrackIndex = (currentTrack + 1) % playlist.length;
-  const nextTrack = new Audio();
-  nextTrack.preload = "metadata";
-  nextTrack.src = encodeURI(playlist[nextTrackIndex]);
-}
-
-
+function playAudio() {return player.play().then(() => {document.getElementById('play-btn').textContent = "⏸";playing = true;startProgressUpdate();}).catch(e => {document.getElementById('error-message').textContent = "Error: " + e.message;document.getElementById('play-btn').textContent = "▶";playing = false;});}
+function startProgressUpdate() {if (progressUpdateInterval) {clearInterval(progressUpdateInterval);}progressUpdateInterval = setInterval(() => {if (!isSeeking && player.duration && !isNaN(player.duration) && playing) {const progress = (player.currentTime / player.duration) * 100;document.getElementById('progress-bar').style.width = `${progress}%`;updateBufferedRanges();}}, 100);}
+function updateBufferedRanges() {if (player.buffered && player.buffered.length > 0) {bufferedRanges = [];for (let i = 0; i < player.buffered.length; i++) {bufferedRanges.push({start: player.buffered.start(i),end: player.buffered.end(i)});}}}
+function isTimeBuffered(time) {for (const range of bufferedRanges) {if (time >= range.start && time <= range.end) {return true;}}return false;}
+function stopProgressUpdate() {if (progressUpdateInterval) {clearInterval(progressUpdateInterval);progressUpdateInterval = null;}}
+document.querySelector('.progress').addEventListener('click', (e) => {if (!player.duration || isNaN(player.duration)) return;const rect = e.currentTarget.getBoundingClientRect();const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));const newTime = percent * player.duration;stopProgressUpdate();isSeeking = true;document.getElementById('progress-bar').style.width = `${percent * 100}%`;if (isTimeBuffered(newTime)) {player.currentTime = newTime;isSeeking = false;if (playing) {startProgressUpdate();}} else {player.currentTime = newTime;document.getElementById('error-message').textContent = "Loading....";const checkBuffering = setInterval(() => {if (isTimeBuffered(newTime) || player.readyState >= 3) {clearInterval(checkBuffering);isSeeking = false;document.getElementById('error-message').textContent = "";if (playing) {startProgressUpdate();}}}, 100);}});
+document.getElementById('play-btn').addEventListener('click', () => {userClicked = true;if (!player.src) loadTrack();if (playing) {player.pause();document.getElementById('play-btn').textContent = "▶";playing = false;stopProgressUpdate();} else {playAudio();}});
+document.getElementById('next-btn').addEventListener('click', () => {userClicked = true;currentTrack = (currentTrack + 1) % playlist.length;loadTrack();if (playing) playAudio();if (typeof sound === 'function') sound("click.mp3");});
+document.getElementById('prev-btn').addEventListener('click', () => {userClicked = true;currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;loadTrack();if (playing) playAudio();if (typeof sound === 'function') sound("click.mp3");});
+document.getElementById('volume-slider').addEventListener('input', (e) => {player.volume = e.target.value;});
+player.addEventListener('loadstart', () => {document.getElementById('error-message').textContent = "Loading..";});
+player.addEventListener('progress', () => {updateBufferedRanges();});
+player.addEventListener('seeking', () => {isSeeking = true;stopProgressUpdate();document.getElementById('error-message').textContent = "Loading.";});
+player.addEventListener('seeked', () => {document.getElementById('error-message').textContent = "Loading....";});
+player.addEventListener('canplay', () => {isSeeking = false;document.getElementById('error-message').textContent = "";if (playing) {startProgressUpdate();}});
+player.addEventListener('canplaythrough', () => {document.getElementById('error-message').textContent = "Full download.";setTimeout(() => {document.getElementById('error-message').textContent = "";}, 2000);});
+player.addEventListener('waiting', () => {document.getElementById('error-message').textContent = "Buffer...";});
+player.addEventListener('stalled', () => {document.getElementById('error-message').textContent = "Problem with loading...";});
+player.addEventListener('ended', () => {currentTrack = (currentTrack + 1) % playlist.length;loadTrack();if (playing && userClicked) playAudio();});
+player.addEventListener('pause', () => {stopProgressUpdate();});
+function preloadNextTrack() {const nextTrackIndex = (currentTrack + 1) % playlist.length;const nextTrack = new Audio();nextTrack.preload = "metadata";nextTrack.src = encodeURI(playlist[nextTrackIndex]);}
 player.volume = 0.7;
+document.addEventListener('click', () => {userClicked = true;}, { once: true });
 
-
-document.addEventListener('click', () => {
-  userClicked = true;
-  if (!audioContextInitialized) {
-    initializeAudioContext();
-  }
-});
 
 
 // ---- ----------------------------------------------------------------------------
