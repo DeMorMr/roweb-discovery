@@ -435,9 +435,9 @@ let progressUpdateInterval = null;
 let bufferedRanges = [];
 
 function loadTrack() {
-  const track = encodeURI(playlist[currentTrack]);
-  
-  player.src = track;
+  const TrackPath = encodeURI(playlist[currentTrack]);
+  console.log('Loading track:', TrackPath);
+  player.src = TrackPath;
   bufferedRanges = [];
   
   player.preload = "metadata"; 
